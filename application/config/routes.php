@@ -49,6 +49,23 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | Examples:	my-controller/index	-> my_controller/index
 |		my-controller/my-method	-> my_controller/my_method
 */
-$route['default_controller'] = 'welcome';
+$route['default_controller'] = 'Dashboard';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
+// login
+$route['login']='Login';
+$route['logout']='Login/logout';
+$route['cek-auth']='Login/aksi_login';
+// countantrian
+$route['antrian-counting']='Dashboard/countantrian';
+$route['antrian-sisa-counting']='Dashboard/countsisaantrian';
+// servis
+$route['servis/tambah-servis']='Dashboard/addservis';
+$route['servis/update-servis']='Dashboard/updateservis';
+$route['servis/hapus-servis/(:num)']='Dashboard/deleteservis/$1';
+$route['servis/list-servis']='Dashboard/listsrv';
+// mekanik
+$route['mekanik/tambah-mekanik']='Dashboard/addmekanik';
+$route['mekanik/update-mekanik']='Dashboard/updatemekanik';
+$route['mekanik/hapus-mekanik/(:num)']='Dashboard/deletemekanik/$1';
+$route['mekanik/list-mekanik']='Dashboard/listmkn';

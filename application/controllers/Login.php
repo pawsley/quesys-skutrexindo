@@ -6,20 +6,24 @@ class Login extends CI_Controller
     
   public function __construct(){
     parent::__construct();
+    $this->load->model('Login_model');
   }
 
   public function index(){
-    $data['css'] = '';
+    $data['css'] = '
+      <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.12.3/dist/sweetalert2.min.css" rel="stylesheet">
+    ';
     $data['content'] = $this->load->view('auth/login', '', true);
     $data['js'] = '
       <script>var base_url = "' . base_url() . '";</script>
-      <script src="' . base_url('assets/js/auth.js') . '"></script>
+      <script src="' . base_url('assets/js/auth.js?v=1.0') . '"></script>
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.12.3/dist/sweetalert2.all.min.js"></script>
     ';
     $this->load->view('base/layout', $data);
   }
   function aksi_login() {
-    $username = $this->input->post('username');
-    $password = $this->input->post('password');
+    $username = $this->input->post('txusername');
+    $password = $this->input->post('txpassword');
     $where = array(
         'username' => $username,
         'password' => $password,

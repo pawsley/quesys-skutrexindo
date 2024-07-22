@@ -12,16 +12,19 @@
 
                 <div class="card border-0 shadow-sm">
                     <div class="card-body text-center d-grid p-5">
-                        <form>
+                        <form class="form-log">
                             <div class="mb-3">
                                 <label for="txusername" class="form-label">Username</label>
-                                <input type="email" class="form-control" id="txusername" placeholder="Masukkan username">
+                                <input type="text" class="form-control" id="txusername" name="txusername" placeholder="Masukkan username">
                             </div>
                             <div class="mb-3">
                                 <label for="txpassword" class="form-label">Password</label>
-                                <input type="password" class="form-control" id="txpassword" placeholder="Masukkan password">
+                                <input type="password" class="form-control" id="txpassword" name="txpassword" placeholder="Masukkan password">
                             </div>
-                            <button type="button" class="btn btn-success"><i class="bi bi-box-arrow-in-right"> Login</i></button>
+                            <button type="submit" id="btnlogin" class="btn btn-success btn-block w-100">
+                                <span id="spinner" class="spinner-border spinner-border-sm text-light d-none" role="status" aria-hidden="true"></span>
+                                <span id="signin"><i class="bi bi-box-arrow-in-right"> Login</i></span>
+                            </button>
                         </form>
                     </div>
                 </div>
