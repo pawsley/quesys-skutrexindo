@@ -2,6 +2,14 @@ body {
   font-family: Poppins, sans-serif;
   background-color: #f6f8fd;
 }
+.fade-in {
+  opacity: 0;
+  transition: opacity 1s ease-in;
+}
+
+.fade-in.show {
+  opacity: 1;
+}
 .p-45 {
   padding: 2rem !important;
 }

@@ -69,3 +69,7 @@ $route['mekanik/tambah-mekanik']='Dashboard/addmekanik';
 $route['mekanik/update-mekanik']='Dashboard/updatemekanik';
 $route['mekanik/hapus-mekanik/(:num)']='Dashboard/deletemekanik/$1';
 $route['mekanik/list-mekanik']='Dashboard/listmkn';
+// antrian
+$route['now-que']='Dashboard/nowantrian';
+$route['antrian/tambah-antrian']='Dashboard/addque';
+$route['antrian/load-antrian-regist']='Dashboard/loadantrian';

@@ -1,12 +1,97 @@
+var tableQueRgst;
 $(document).ready(function() {
+    $(document).on('select2:open', () => {
+        document.querySelector('.select2-search__field').focus();
+    });
+    $(".select2").select2({
+        containerCssClass: function(e) { 
+          return $(e).attr('required') ? 'required' : '';
+        }
+    });
+    $('.fade-in').each(function(index) {
+        $(this).delay(200 * index).queue(function(next) {
+            $(this).addClass('show');
+            next();
+        });
+    });
     setInterval(function() {
         AntrianCount();
         SisaAntrianCount();
+        // loadCards();
     }, 2000);
     modal_addsrv();
     modal_addmkn();
+    modal_que();
+    tableque();
+    callque();
 });
 
+function tableque() {
+    if ($.fn.DataTable.isDataTable('#tabel-antrian')) {
+        tableQueRgst.destroy();
+    }
+    tableQueRgst = $("#tabel-antrian").DataTable({
+        "processing": true,
+        "language": {
+            "processing": '<div class="d-flex justify-content-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>',
+        },
+        "serverSide": true,
+        "order": [
+            [0, 'asc']
+        ],
+        "ajax": {
+            "url": base_url + 'antrian/load-antrian-regist/',
+            "type": "POST"
+        },
+        "columns": [
+            { "data": "no_antrian" },
+            { "data": "book_time" },
+            { "data": "nama_cst" },
+            { "data": "nama_servis" },
+            { "data": "nama_mkn" },
+            {
+                "data": "id",
+                "orderable": false,
+                "render": function (data, type, full, meta) {
+                    if (type === "display") {
+                        return `
+                                <ul class="action">
+                                    <div class="btn-group">
+                                        <button class="btn btn-success" id="callingque"
+                                        data-id="${data}" data-noque="${full.no_antrian}" data-mkn="${full.nama_mkn}"><i class="bi-mic-fill"></i></button>
+                                    </div>
+                                </ul>
+                            `;
+                    }
+                    return data;
+                }
+            }    
+        ],
+        "dom":  "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                "<'row'<'col-sm-12 col-md-2 mt-2'B>>" +
+                "<'row'<'col-sm-12'tr>>" +
+                "<'row'<'col-sm-12 col-md-4'i><'col-sm-12 col-md-8'p>>",
+                "buttons": [
+                {
+                    "text": 'Refresh', // Font Awesome icon for refresh
+                    "className": 'btn btn-success', // Add a class name for identification
+                    "attr": {
+                        "id": "refresh-button" // Set the ID attribute
+                    },
+                    "init": function (api, node, config) {
+                        $(node).removeClass('btn-default');
+                        $(node).addClass('btn-success');
+                        $(node).attr('title', 'Refresh'); // Add a title attribute for tooltip
+                    },
+                    "action": function () {
+                        tableQueRgst.ajax.reload();
+                    }
+                },
+            ]
+            
+    });
+    return tableQueRgst;
+}
 function AntrianCount() {
     $.ajax({
         url: base_url+'antrian-counting/',
@@ -16,6 +101,20 @@ function AntrianCount() {
         },
         error: function() {
             $('#jumlah-antrian').text('0');
+        }
+    });
+}
+function NowQue() {
+    $.ajax({
+        url: base_url+'now-que/',
+        type: 'GET',
+        success: function(response) {
+            $('#antrian').text(response);
+            $('#noque').val(response);
+        },
+        error: function() {
+            $('#antrian').text('0');
+            $('#noque').val('0');
         }
     });
 }
@@ -473,5 +572,281 @@ function deletemkn() {
                 });
             }
         });
+    });
+}
+// antrian
+function modal_que() {
+    $('#modaque').on('show.bs.modal', function (e) {
+        var btn = e.relatedTarget;
+        var cid = $(btn).data('id');
+
+        if (cid ==='queatr') {
+            NowQue();
+            setTimeout(function () {
+                $('#namacst').val('');
+                $('#namacst').focus();
+            }, 500);
+            $("#selmkn").val('0').trigger('change.select2');
+            $("#selsrv").val('0').trigger('change.select2');
+            $("#selbook").val('0').trigger('change.select2');
+            selectque();
+            addque();
+        }
+    });
+}
+function selectque() {
+    $('#selmkn').select2({
+        dropdownParent: $("#modaque"),
+        theme: 'classic',
+        placeholder: 'Pilih Mekanik',
+        allowClear: true,
+        ajax: {
+            url: base_url + 'mekanik/list-mekanik',
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+                return {
+                    q: params.term, // Add the search term to your AJAX request
+                };
+            },
+            processResults: function (data) {
+                return {
+                    results: $.map(data, function (item) {
+                        return {
+                            id: item.id_mkn,
+                            text: item.nama_mkn,
+                        };
+                    }),
+                };
+            },
+            cache: false,
+        },
+    });
+    $('#selsrv').select2({
+        dropdownParent: $("#modaque"),
+        theme: 'classic',
+        placeholder: 'Pilih Jenis Servis',
+        allowClear: true,
+        ajax: {
+            url: base_url + 'servis/list-servis',
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+                return {
+                    q: params.term, // Add the search term to your AJAX request
+                };
+            },
+            processResults: function (data) {
+                return {
+                    results: $.map(data, function (item) {
+                        return {
+                            id: item.id_servis,
+                            text: item.nama_servis,
+                        };
+                    }),
+                };
+            },
+            cache: false,
+        },
+    });
+    $('#selmkn').on('select2:select', function(e) {
+        var data = e.params.data;
+        var id_mkn = data.id;
+        var startTime = 10; // Start time in 24-hour format
+        var endTime = 17; // End time in 24-hour format
+        var select = $('#selbook');
+        var selectedValues = select.val() || [];
+    
+        $.ajax({
+            url: base_url + 'Dashboard/cekavail/', // URL to your CI controller method
+            type: 'POST',
+            data: {
+                id_mkn: id_mkn
+            },
+            dataType: 'json',
+            success: function(response) {
+                select.empty();
+                
+                var options = [];
+                var bookedTimes = response.map(function(daf) { return daf.book_time; });
+    
+                for (var hour = startTime; hour < endTime; hour++) {
+                    var start = ('0' + hour).slice(-2) + ':00';
+                    var end = ('0' + (hour + 1)).slice(-2) + ':00';
+                    var optionText = start + '-' + end;
+                    // var optionValue = hour + '-' + (hour + 1);
+                    var optionValue = start + '-' + end;
+    
+                    // Check if this time slot is booked
+                    if (bookedTimes.includes(optionText)) {
+                        optionText += ' (booked)';
+                    }
+    
+                    var option = new Option(optionText, optionValue, false, false);
+                    options.push(option);
+                }
+
+                var placeholder = new Option('Pilih Jam Booking', '0', true, false);
+                select.append(placeholder);
+                // Append options to select element
+                select.append(options);
+    
+                // Initialize select2 once
+                select.select2({
+                    dropdownParent: $("#modaque"),
+                    theme: 'classic',
+                    placeholder: 'Pilih Jam Booking',
+                    allowClear: true,
+                });
+                if (selectedValues.length === 0 || selectedValues.includes('0')) {
+                    select.val('0').trigger('change'); // Set placeholder as selected
+                } else {
+                    select.val(selectedValues).trigger('change');
+                }
+                select.find('option[value="0"]').prop('disabled', true);
+                // Disable options based on the response
+                select.find('option').each(function() {
+                    var optionText = $(this).text();
+                    if (optionText.endsWith('(booked)')) {
+                        $(this).prop('disabled', true);
+                    }
+                });
+    
+                // Refresh select2 to show disabled options correctly
+                select.trigger('change.select2');
+            },
+            error: function(xhr, status, error) {
+                console.error('Error checking availability:', error);
+            }
+        });
+    });
+    $('#selbook').select2({
+        dropdownParent: $("#modaque"),
+        theme: 'classic',
+        placeholder: 'Pilih Jam Booking',
+        allowClear: true,
+    });
+}
+function addque() {
+    $('#form-que').submit(function(e) {
+        e.preventDefault(); // Prevent form submission
+        $('#spinner-que').removeClass('d-none');
+        $('#txque').addClass('d-none');
+        $('#addque').prop('disabled', true);
+
+        var formData = $(this).serialize();
+
+        $.ajax({
+            type: 'POST',
+            url: base_url+'/antrian/tambah-antrian', 
+            data: formData,
+            dataType: 'json',
+            success: function(response) {
+                if (response.status ==='success') {
+                    Swal.fire({
+                        title: 'Success',
+                        text: "Data berhasil ditambahkan",
+                        icon: 'success',
+                        showConfirmButton: false,
+                        timer: 1000
+                    }).then(() => {
+                        NowQue();
+                        $('#namacst').val('');
+                        $('#namacst').focus();
+                        $("#selmkn").val('0').trigger('change.select2');
+                        $("#selsrv").val('0').trigger('change.select2');
+                        $("#selbook").val('0').trigger('change.select2');
+                        tableQueRgst.ajax.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Warning',
+                        text: "Antrian sudah ada",
+                        icon: 'warning',
+                        showConfirmButton: false,
+                        timer: 1000
+                    }).then(() => {
+                        $('#namacst').focus();
+                    });
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error(xhr.responseText); 
+            },
+            complete: function() {
+                $('#spinner-que').addClass('d-none');
+                $('#txque').removeClass('d-none');
+                $('#addque').prop('disabled', false);
+            }
+        });
+    });
+    $('#form-que input').keypress(function(e) {
+        if (e.which == 13) { // Enter key
+            $('#form-que').submit();
+            return false; // Prevent default form submission
+        }
+    });
+}
+function callque() {
+    $('#tabel-antrian').on('click', '#callingque', function (e) {
+        var id = $(this).data('id');
+        var antrian = $(this).data('noque');
+        var mekanik = $(this).data('mkn');
+        var $bell = $('#tingtung')[0];
+
+        // mainkan suara bell antrian
+        $bell.pause();
+        $bell.currentTime = 0;
+        $bell.play();
+
+        // set delay antara suara bell dengan suara nomor antrian
+        var durasi_bell = $bell.duration * 770;
+
+        // mainkan suara nomor antrian
+        setTimeout(function() {
+            responsiveVoice.speak("Nomor Antrian, " + antrian + ", menuju, mekanik, "+ mekanik +"", "Indonesian Male", {
+                rate: 0.9,
+                pitch: 1,
+                volume: 1
+            });
+        }, durasi_bell);
+
+        $.ajax({
+            url: base_url + 'Dashboard/callingque/', // URL to your CI controller method
+            type: 'POST',
+            data: {
+                idque: id
+            },
+            dataType: 'json',
+            success: function(response) {
+                console.log(response.status);
+                // console.log('panggil');
+                // setInterval(function() {
+                    loadCards();
+                // }, 2000);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error checking availability:', error);
+            }
+        });
+    });
+}
+function loadCards() {
+    $.ajax({
+        url: base_url + 'Dashboard/getCardData/', // URL to your CI controller method to get card data
+        type: 'GET',
+        dataType: 'html',
+        success: function(response) {
+            $('#card-container').html(response);
+            $('.fade-in').each(function(index) {
+                $(this).delay(200 * index).queue(function(next) {
+                    $(this).addClass('show');
+                    next();
+                });
+            });
+        },
+        error: function(xhr, status, error) {
+            console.error('Error loading cards:', error);
+        }
     });
 }

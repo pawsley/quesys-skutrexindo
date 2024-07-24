@@ -21,7 +21,7 @@
 
     <!-- Font -->
     <!-- <link href="https://fonts.googleapis.com/css?family=Raleway:700,800,900&amp;display=swap" rel="stylesheet"> -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@700;900&display=swap">
 
     <!-- Custom Style -->
     <link rel="stylesheet" href="<?=base_url()?>assets/css/style.css">
@@ -38,10 +38,11 @@
             <div class="container">
             <!-- copyright -->
                 <div class="copyright text-center mb-2 mb-md-0">
-                    &copy; 2024 - <a href="https://www.instagram.com/skutrexindo/" target="_blank" class="text-danger text-decoration-none">@skutrexindo</a>. All rights reserved.
+                    &copy; 2024 <a href="https://www.instagram.com/skutrexindo/" target="_blank" class="text-danger text-decoration-none">@skutrexindo</a>. All rights reserved.
                 </div>
             </div>
         </footer>
+        <audio id="tingtung" src="assets/audio/tingtung.mp3"></audio>
 
         <!-- jQuery Core -->
         <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
@@ -49,6 +50,7 @@
         <!-- Popper and Bootstrap JS -->
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.min.js" integrity="sha384-Atwg2Pkwv9vp0ygtn1JAojH0nYbwNJLPhwyoVbhoPwBhjQPR5VtM2+xf0Uwh9KtT" crossorigin="anonymous"></script>
+        <script src="https://code.responsivevoice.org/responsivevoice.js?key=jQZ2zcdq"></script>
 
     </body>
 
