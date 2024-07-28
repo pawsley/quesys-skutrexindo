@@ -1,4 +1,4 @@
-<div class="container pt-4">
+    <div class="container pt-4">
         <div class="d-flex flex-column flex-md-row px-4 py-3 mb-4 bg-white rounded-2 shadow-sm sticky-top">
             <marquee class="fs-3 text-success" behavior="scroll" direction="left" scrollamount="10">
                 Selamat datang di SKUTREXINDO! Nomor antrian Anda akan segera dipanggil. Terima kasih atas kesabaran Anda.
