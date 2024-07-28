@@ -8,19 +8,13 @@ $(document).ready(function() {
           return $(e).attr('required') ? 'required' : '';
         }
     });
-    $('.fade-in').each(function(index) {
-        $(this).delay(200 * index).queue(function(next) {
-            $(this).addClass('show');
-            next();
-        });
-    });
     setInterval(function() {
         AntrianCount();
         SisaAntrianCount();
-        // loadCards();
     }, 2000);
     modal_addsrv();
     modal_addmkn();
+    modal_addfront();
     modal_que();
     tableque();
     callque();
@@ -47,8 +41,14 @@ function tableque() {
             { "data": "no_antrian" },
             { "data": "book_time" },
             { "data": "nama_cst" },
-            { "data": "nama_servis" },
+            {
+                "data": "nama_servis",
+                "render": function(data, type, row) {
+                    return data.replace(/\n/g, '<br>');
+                }
+            },
             { "data": "nama_mkn" },
+            { "data": "nama_fr" },
             {
                 "data": "id",
                 "orderable": false,
@@ -130,10 +130,17 @@ function SisaAntrianCount() {
         }
     });
 }
-
+// servis
 function addservis() {
-    $('#form-srv').submit(function(e) {
-        e.preventDefault(); // Prevent form submission
+    let isSubmitting = false; 
+    $('#form-srv').off('submit').on('submit', function(e) {
+        e.preventDefault(); 
+
+        if (isSubmitting) {
+            return; 
+        }
+
+        isSubmitting = true; 
         $('#spinner-srv').removeClass('d-none');
         $('#txsubsrv').addClass('d-none');
         $('#subsrv').prop('disabled', true);
@@ -173,21 +180,16 @@ function addservis() {
                 console.error(xhr.responseText); 
             },
             complete: function() {
+                isSubmitting = false;
                 $('#spinner-srv').addClass('d-none');
                 $('#txsubsrv').removeClass('d-none');
                 $('#subsrv').prop('disabled', false);
             }
         });
     });
-    $('#form-srv input').keypress(function(e) {
-        if (e.which == 13) { // Enter key
-            $('#form-srv').submit();
-            return false; // Prevent default form submission
-        }
-    });
 }
 function modal_addsrv() {
-    $('#modaddsrv').on('show.bs.modal', function (e) {
+    $('#modaddsrv').off('show.bs.modal').on('show.bs.modal', function (e) {
         var btn = e.relatedTarget;
         var cid = $(btn).data('id');
 
@@ -196,7 +198,7 @@ function modal_addsrv() {
             $('#form-srv').removeClass('d-none');
             $('#formu-mkn').addClass('d-none');
             $('#list-srv').addClass('d-none');
-            $('.modal-footer').addClass('d-none');
+            $('#mfsrv').addClass('d-none');
             setTimeout(function () {
                 $('#namasrv').val('');
                 $('#namasrv').focus();
@@ -208,8 +210,7 @@ function modal_addsrv() {
             $('#form-srv').addClass('d-none');
             $('#formu-srv').removeClass('d-none');
             $('#updsrv').removeClass('d-none');
-            $('.modal-footer').removeClass('d-none');
-
+            $('#mfsrv').removeClass('d-none');
             listsrv();
             updateservis();
             deletesrv();
@@ -227,6 +228,7 @@ function listsrv() {
                 $('#list-srv').append('<h5 class="text-center">No Data</h5>');
                 $('#updsrv').addClass('d-none');
             } else {
+                $('#updsrv').removeClass('d-none');
                 $.each(response, function(index, daf) {
                     var dafContainer = $('<div class="row mt-2 srv-item">');
                     var inputField = $('<input class="form-control srv-name" data-id="'+daf.id_servis+'" type="text">')
@@ -302,12 +304,6 @@ function updateservis() {
             }
         });
     });
-    $('#modaddsrv').keypress(function(e) {
-        if (e.which == 13) { // Enter key
-            $('#formu-srv').submit();
-            return false; // Prevent default form submission
-        }
-    });
 }
 function deletesrv() {
     $(document).on('click', '.delsrv', function(e) {
@@ -354,21 +350,30 @@ function deletesrv() {
 }
 // mekanik
 function addmekanik() {
-    $('#form-mkn').submit(function(e) {
-        e.preventDefault(); // Prevent form submission
+    let isSubmitting = false; 
+    $('#form-mkn').off('submit').on('submit', function(e) {
+        e.preventDefault(); 
+
+        if (isSubmitting) {
+            return; 
+        }
+
+        isSubmitting = true; 
         $('#spinner-mkn').removeClass('d-none');
         $('#txsubmkn').addClass('d-none');
         $('#submkn').prop('disabled', true);
 
-        var formData = $(this).serialize();
+        var formData = new FormData(this);
 
         $.ajax({
             type: 'POST',
             url: base_url+'/mekanik/tambah-mekanik', 
             data: formData,
             dataType: 'json',
+            processData: false, 
+            contentType: false, 
             success: function(response) {
-                if (response.status ==='success') {
+                if (response.status === 'success') {
                     Swal.fire({
                         title: 'Success',
                         text: "Data berhasil ditambahkan",
@@ -377,39 +382,44 @@ function addmekanik() {
                         timer: 1000
                     }).then(() => {
                         $('#namamkn').val('');
+                        $('#upload-mkn').css('background-image', 'none');
+                        $('#imgmkn').val('');
                         $('#namamkn').focus();
                     });
-                } else {
+                } else if (response.status === 'exists') {
                     Swal.fire({
                         title: 'Warning',
-                        text: "nama mekanik sudah ada",
+                        text: "Nama mekanik sudah ada",
                         icon: 'warning',
                         showConfirmButton: false,
                         timer: 1000
                     }).then(() => {
                         $('#namamkn').focus();
                     });
+                } else {
+                    Swal.fire({
+                        title: 'Error',
+                        text: response.message,
+                        icon: 'error',
+                        showConfirmButton: true
+                    });
                 }
             },
             error: function(xhr, status, error) {
-                console.error(xhr.responseText); 
+                console.error(xhr.responseText);
             },
             complete: function() {
+                isSubmitting = false; 
                 $('#spinner-mkn').addClass('d-none');
                 $('#txsubmkn').removeClass('d-none');
                 $('#submkn').prop('disabled', false);
             }
         });
     });
-    $('#form-mkn input').keypress(function(e) {
-        if (e.which == 13) { // Enter key
-            $('#form-mkn').submit();
-            return false; // Prevent default form submission
-        }
-    });
 }
 function modal_addmkn() {
-    $('#modaddmkn').on('show.bs.modal', function (e) {
+    let fileReader;
+    $('#modaddmkn').off('show.bs.modal').on('show.bs.modal', function (e) {
         var btn = e.relatedTarget;
         var cid = $(btn).data('id');
 
@@ -418,11 +428,12 @@ function modal_addmkn() {
             $('#form-mkn').removeClass('d-none');
             $('#formu-mkn').addClass('d-none');
             $('#list-mkn').addClass('d-none');
-            $('.modal-footer').addClass('d-none');
+            $('#mfmkn').addClass('d-none');
             setTimeout(function () {
                 $('#namamkn').val('');
                 $('#namamkn').focus();
             }, 500);
+            imgpreviewmkn(fileReader);
             addmekanik();
         } else if (cid === 'lmkn'){
             $('#modaddmknLabel').text('List Mekanik');
@@ -430,12 +441,14 @@ function modal_addmkn() {
             $('#form-mkn').addClass('d-none');
             $('#formu-mkn').removeClass('d-none');
             $('#umkn').removeClass('d-none');
-            $('.modal-footer').removeClass('d-none');
-
+            $('#mfmkn').removeClass('d-none');
             listmkn();
             updatemekanik();
             deletemkn();
         }
+    });
+    $('#modaddmkn').off('hide.bs.modal').on('hide.bs.modal', function() {
+        clearImagePreviewmkn(fileReader);
     });
 }
 function listmkn() {
@@ -445,18 +458,63 @@ function listmkn() {
         url: base_url + 'mekanik/list-mekanik',
         dataType: 'json',
         success: function(response) {
+            console.log(response);
             if (response.length === 0) {
                 $('#list-mkn').append('<h5 class="text-center">No Data</h5>');
                 $('#updmkn').addClass('d-none');
             } else {
+                $('#updmkn').removeClass('d-none');
                 $.each(response, function(index, daf) {
                     var dafContainer = $('<div class="row mt-2 mkn-item">');
-                    var inputField = $('<input class="form-control mkn-name" data-id="'+daf.id_mkn+'" type="text">')
-                                        .val(daf.nama_mkn);
+
+                    var inputField = $('<input class="form-control mkn-name" data-id="'+daf.id_mkn+'" type="text">').val(daf.nama_mkn);
+
+                    var imgUpload = $('<input class="form-control imgprm" id="imgprm-'+daf.id_mkn+'" name="imgprm[]" type="file" accept=".png, .jpg, .jpeg" style="display: none;">');
+
+                    var imgButton = $('<div class="input-group-text"></div>').css({
+                        width: '40px',
+                        height: '40px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center'
+                    }).click(function() {
+                        imgUpload.click();
+                    });
+
+                    if (daf.foto_mkn) {
+                        imgButton.css({
+                            backgroundImage: 'url(' + base_url + 'assets/foto-mekanik/' + daf.foto_mkn + ')',
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center'
+                        }).empty(); // Clear the content if there was an icon
+                    } else {
+                        imgButton.html('<i class="bi bi-person-circle"></i>').css({
+                            backgroundImage: 'none',
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center'
+                        });
+                    }
+
+                    imgUpload.on('change', function() {
+                        const file = this.files[0];
+                        if (file) {
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                imgButton.css('background-image', 'url(' + e.target.result + ')').empty();
+                            };
+                            reader.readAsDataURL(file);
+                        }
+                    });
+
                     var deleteButton = $('<button class="btn btn-danger delmkn" data-id="'+daf.id_mkn+'" type="button"><i class="bi bi-trash3"></i></button>');
 
-                    dafContainer.append($('<div class="col-10">').append(inputField));
+                    var inputGroup = $('<div class="input-group">');
+                    inputGroup.append(imgButton).append(inputField);
+
+                    dafContainer.append($('<div class="col-10">').append(inputGroup));
                     dafContainer.append($('<div class="col-2">').append(deleteButton));
+                    dafContainer.append($('<div class="col-md-12">').append(imgUpload));
 
                     $('#list-mkn').append(dafContainer);
                 });
@@ -474,17 +532,20 @@ function updatemekanik() {
         $('#spinner-umkn').removeClass('d-none');
         $('#txupdmkn').addClass('d-none');
         $('#updmkn').prop('disabled', true);
-        var dafData = [];
-        var hasEmptyField = false;
-        $('#list-mkn .mkn-item').each(function() {
-            var idsb = $(this).find('.mkn-name').data('id');
-            var namasb = $(this).find('.mkn-name').val();
 
-            if (namasb === '') {
+        var formData = new FormData();
+        hasEmptyField = false;
+
+        $('#list-mkn .mkn-item').each(function(index) {
+            var id = $(this).find('.mkn-name').data('id');
+            var name = $(this).find('.mkn-name').val();
+            var img = $(this).find('.imgprm')[0].files[0];
+
+            if (name === '') {
                 hasEmptyField = true;
                 Swal.fire({
                     title: 'Warning',
-                    text: "Nama servis tidak boleh kosong",
+                    text: "Nama mekanik tidak boleh kosong",
                     icon: 'warning',
                     showConfirmButton: false,
                     timer: 1000
@@ -493,17 +554,23 @@ function updatemekanik() {
                 });
                 return false; // Exit the loop
             }
-            dafData.push({
-                id: idsb,
-                name: namasb
-            });
+            formData.append('ids[]', id);
+            formData.append('names[]', name);
+            if (img) {
+                formData.append('imgs[]', img);
+                formData.append('file_indices[]', index); // Add file index
+            }
         });
-        var jsonData = JSON.stringify(dafData);
+
+        if (hasEmptyField) return;
+
         $.ajax({
             type: 'POST',
             url: base_url + 'mekanik/update-mekanik', 
             contentType: 'application/json',
-            data: jsonData,
+            data: formData,
+            processData: false,
+            contentType: false,
             success: function(response) {
                 if (response.status ==='success') {
                     Swal.fire({
@@ -523,12 +590,6 @@ function updatemekanik() {
                 $('#updmkn').prop('disabled', false);
             }
         });
-    });
-    $('#modaddmkn').keypress(function(e) {
-        if (e.which == 13) { // Enter key
-            $('#formu-mkn').submit();
-            return false; // Prevent default form submission
-        }
     });
 }
 function deletemkn() {
@@ -573,6 +634,36 @@ function deletemkn() {
             }
         });
     });
+}
+function imgpreviewmkn(fileReader) {
+    $('#upload-mkn').off('click').on('click', function() {
+        $('#imgmkn').click();
+    });
+
+    $('#imgmkn').off('change').on('change', function(event) {
+        const file = event.target.files[0];
+        const $uploadBtn = $('#upload-mkn');
+
+        if (file) {
+            fileReader = new FileReader();
+
+            fileReader.onload = function(e) {
+                lastImageUrl = e.target.result;
+                $uploadBtn.css('background-image', 'url(' + e.target.result + ')');
+            };
+
+            fileReader.readAsDataURL(file);
+        }
+    });
+}
+function clearImagePreviewmkn(fileReader) {
+    const $uploadBtn = $('#upload-mkn');
+    $uploadBtn.css('background-image', 'none');
+    $('#imgmkn').val(''); 
+    if (fileReader) {
+        fileReader.abort();
+        fileReader = null; 
+    }
 }
 // antrian
 function modal_que() {
@@ -622,11 +713,39 @@ function selectque() {
             cache: false,
         },
     });
+    $('#selfr').select2({
+        dropdownParent: $("#modaque"),
+        theme: 'classic',
+        placeholder: 'Pilih Frontliner',
+        allowClear: true,
+        ajax: {
+            url: base_url + 'frontliner/list-frontliner',
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+                return {
+                    q: params.term, // Add the search term to your AJAX request
+                };
+            },
+            processResults: function (data) {
+                return {
+                    results: $.map(data, function (item) {
+                        return {
+                            id: item.id_fr,
+                            text: item.nama_fr,
+                        };
+                    }),
+                };
+            },
+            cache: false,
+        },
+    });
     $('#selsrv').select2({
         dropdownParent: $("#modaque"),
         theme: 'classic',
         placeholder: 'Pilih Jenis Servis',
         allowClear: true,
+        multiple: true,
         ajax: {
             url: base_url + 'servis/list-servis',
             dataType: 'json',
@@ -728,8 +847,15 @@ function selectque() {
     });
 }
 function addque() {
-    $('#form-que').submit(function(e) {
-        e.preventDefault(); // Prevent form submission
+    let isSubmitting = false; 
+    $('#form-que').off('submit').on('submit', function(e) {
+        e.preventDefault(); 
+
+        if (isSubmitting) {
+            return; 
+        }
+
+        isSubmitting = true; 
         $('#spinner-que').removeClass('d-none');
         $('#txque').addClass('d-none');
         $('#addque').prop('disabled', true);
@@ -774,59 +900,45 @@ function addque() {
                 console.error(xhr.responseText); 
             },
             complete: function() {
+                isSubmitting = false;
                 $('#spinner-que').addClass('d-none');
                 $('#txque').removeClass('d-none');
                 $('#addque').prop('disabled', false);
             }
         });
     });
-    $('#form-que input').keypress(function(e) {
-        if (e.which == 13) { // Enter key
-            $('#form-que').submit();
-            return false; // Prevent default form submission
-        }
-    });
 }
 function callque() {
-    $('#tabel-antrian').on('click', '#callingque', function (e) {
-        var id = $(this).data('id');
-        var antrian = $(this).data('noque');
-        var mekanik = $(this).data('mkn');
-        var $bell = $('#tingtung')[0];
+    $('#tabel-antrian').off('click', '#callingque').on('click', '#callingque', function (e) {
+        e.preventDefault(); // Prevent default action if necessary
+        var button = $(this);
 
-        // mainkan suara bell antrian
-        $bell.pause();
-        $bell.currentTime = 0;
-        $bell.play();
+        if (button.prop('disabled')) {
+            return;
+        }
 
-        // set delay antara suara bell dengan suara nomor antrian
-        var durasi_bell = $bell.duration * 770;
-
-        // mainkan suara nomor antrian
-        setTimeout(function() {
-            responsiveVoice.speak("Nomor Antrian, " + antrian + ", menuju, mekanik, "+ mekanik +"", "Indonesian Male", {
-                rate: 0.9,
-                pitch: 1,
-                volume: 1
-            });
-        }, durasi_bell);
+        button.prop('disabled', true); // Disable button
+        var id = button.data('id');
+        var antrian = button.data('noque');
+        var mekanik = button.data('mkn');
 
         $.ajax({
             url: base_url + 'Dashboard/callingque/', // URL to your CI controller method
             type: 'POST',
             data: {
-                idque: id
+                idque: id,
+                nomor: antrian,
+                mekanik: mekanik
             },
             dataType: 'json',
             success: function(response) {
                 console.log(response.status);
-                // console.log('panggil');
-                // setInterval(function() {
-                    loadCards();
-                // }, 2000);
             },
             error: function(xhr, status, error) {
                 console.error('Error checking availability:', error);
+            },
+            complete: function() {
+                button.prop('disabled', false);
             }
         });
     });
@@ -850,3 +962,322 @@ function loadCards() {
         }
     });
 }
+// frontliner
+function addfront() {
+    let isSubmitting = false; 
+
+    $('#form-fr').off('submit').on('submit', function(e) {
+        e.preventDefault(); 
+
+        if (isSubmitting) {
+            return; 
+        }
+
+        isSubmitting = true; 
+        $('#spinner-fr').removeClass('d-none');
+        $('#txsubfr').addClass('d-none');
+        $('#subfr').prop('disabled', true);
+
+        var formData = new FormData(this); 
+
+        $.ajax({
+            type: 'POST',
+            url: base_url + '/frontliner/tambah-frontliner',
+            data: formData,
+            dataType: 'json',
+            processData: false, 
+            contentType: false, 
+            success: function(response) {
+                if (response.status === 'success') {
+                    Swal.fire({
+                        title: 'Success',
+                        text: "Data berhasil ditambahkan",
+                        icon: 'success',
+                        showConfirmButton: false,
+                        timer: 1000
+                    }).then(() => {
+                        $('#namafr').val('');
+                        $('#upload-btn').css('background-image', 'none');
+                        $('#imgm').val('');
+                        $('#namafr').focus();
+                    });
+                } else if (response.status === 'exists') {
+                    Swal.fire({
+                        title: 'Warning',
+                        text: "Nama frontliner sudah ada",
+                        icon: 'warning',
+                        showConfirmButton: false,
+                        timer: 1000
+                    }).then(() => {
+                        $('#namafr').focus();
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Error',
+                        text: response.message,
+                        icon: 'error',
+                        showConfirmButton: true
+                    });
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error(xhr.responseText);
+            },
+            complete: function() {
+                isSubmitting = false; 
+                $('#spinner-fr').addClass('d-none');
+                $('#txsubfr').removeClass('d-none');
+                $('#subfr').prop('disabled', false);
+            }
+        });
+    });
+}
+function modal_addfront() {
+    let fileReader;
+    $('#modaaddfr').off('show.bs.modal').on('show.bs.modal', function (e) {
+        var btn = e.relatedTarget;
+        var cid = $(btn).data('id');
+
+        if (cid ==='afr') {
+            $('#modaaddfrLabel').text('Tambahkan Frontliner');
+            $('#form-fr').removeClass('d-none');
+            $('#formu-fr').addClass('d-none');
+            $('#list-fr').addClass('d-none');
+            $('#mffr').addClass('d-none');
+            setTimeout(function () {
+                $('#namafr').val('');
+                $('#namafr').focus();
+            }, 500);
+            imgpreviewfr(fileReader);
+            addfront();
+        } else if (cid === 'lfr'){
+            $('#modaaddfrLabel').text('List Frontliner');
+            $('#list-fr').removeClass('d-none');
+            $('#form-fr').addClass('d-none');
+            $('#formu-fr').removeClass('d-none');
+            $('#ufr').removeClass('d-none');
+            $('#mffr').removeClass('d-none');
+            listfront();
+            updatefront();
+            deletefront();
+        }
+    });
+    $('#modaaddfr').off('hide.bs.modal').on('hide.bs.modal', function() {
+        clearImagePreview(fileReader)
+    });
+}
+function listfront() {
+    $('#list-fr').empty();
+    $.ajax({
+        type: 'GET',
+        url: base_url + 'frontliner/list-frontliner',
+        dataType: 'json',
+        success: function(response) {
+            if (response.length === 0) {
+                $('#list-fr').append('<h5 class="text-center">No Data</h5>');
+                $('#updfr').addClass('d-none');
+            } else {
+                $('#updfr').removeClass('d-none');
+                $.each(response, function(index, daf) {
+                    var dafContainer = $('<div class="row mt-2 fr-item">');
+
+                    var inputField = $('<input class="form-control fr-name" data-id="'+daf.id_fr+'" type="text">').val(daf.nama_fr);
+
+                    var imgUpload = $('<input class="form-control imgpr" id="imgpr-'+daf.id_fr+'" name="imgpr[]" type="file" accept=".png, .jpg, .jpeg" style="display: none;">');
+
+                    var imgButton = $('<div class="input-group-text"></div>').css({
+                        width: '40px',
+                        height: '40px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center'
+                    }).click(function() {
+                        imgUpload.click();
+                    });
+
+                    if (daf.foto_fr) {
+                        imgButton.css({
+                            backgroundImage: 'url(' + base_url + 'assets/foto-frontliner/' + daf.foto_fr + ')',
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center'
+                        }).empty(); // Clear the content if there was an icon
+                    } else {
+                        imgButton.html('<i class="bi bi-person-circle"></i>').css({
+                            backgroundImage: 'none',
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center'
+                        });
+                    }
+
+                    imgUpload.on('change', function() {
+                        const file = this.files[0];
+                        if (file) {
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                imgButton.css('background-image', 'url(' + e.target.result + ')').empty();
+                            };
+                            reader.readAsDataURL(file);
+                        }
+                    });
+
+                    var deleteButton = $('<button class="btn btn-danger delfr" data-id="'+daf.id_fr+'" type="button"><i class="bi bi-trash3"></i></button>');
+
+                    var inputGroup = $('<div class="input-group">');
+                    inputGroup.append(imgButton).append(inputField);
+
+                    dafContainer.append($('<div class="col-md-10">').append(inputGroup));
+                    dafContainer.append($('<div class="col-md-2">').append(deleteButton));
+                    dafContainer.append($('<div class="col-md-12">').append(imgUpload));
+
+                    $('#list-fr').append(dafContainer);
+                });
+            }
+        },
+        error: function() {
+            $('#list-fr').append('<h5 class="text-center">No Data</h5>');
+            $('#updfr').addClass('d-none');
+        }
+    });
+}
+function updatefront() {
+    $('#formu-fr').submit(function(e) {
+        e.preventDefault();
+        $('#spinner-fru').removeClass('d-none');
+        $('#txupdfr').addClass('d-none');
+        $('#updfr').prop('disabled', true);
+
+        var formData = new FormData();
+        hasEmptyField = false;
+
+        $('#list-fr .fr-item').each(function(index) {
+            var id = $(this).find('.fr-name').data('id');
+            var name = $(this).find('.fr-name').val();
+            var img = $(this).find('.imgpr')[0].files[0];
+
+            if (name === '') {
+                hasEmptyField = true;
+                Swal.fire({
+                    title: 'Warning',
+                    text: "Nama frontliner tidak boleh kosong",
+                    icon: 'warning',
+                    showConfirmButton: false,
+                    timer: 1000
+                }).then(() => {
+                    $(this).find('.fr-name').focus(); // Focus on the empty input field
+                });
+                return false; // Exit the loop
+            }
+            formData.append('ids[]', id);
+            formData.append('names[]', name);
+            if (img) {
+                formData.append('imgs[]', img);
+                formData.append('file_indices[]', index); // Add file index
+            }
+        });
+
+        if (hasEmptyField) return;
+
+        $.ajax({
+            type: 'POST',
+            url: base_url + 'frontliner/update-frontliner',
+            data: formData,
+            processData: false, 
+            contentType: false, 
+            success: function(response) {
+                if (response.status === 'success') {
+                    Swal.fire({
+                        title: 'Success',
+                        text: "Data berhasil diupdate",
+                        icon: 'success',
+                        showConfirmButton: false,
+                        timer: 1000
+                    }).then(() => {
+                        listfront();
+                    });
+                } else {
+                    Swal.fire('Error!', response.message, 'error');
+                }
+            },
+            complete: function() {
+                $('#spinner-fru').addClass('d-none');
+                $('#txupdfr').removeClass('d-none');
+                $('#updfr').prop('disabled', false);
+            }
+        });
+    });
+}
+function deletefront() {
+    $(document).on('click', '.delfr', function(e) {
+        e.preventDefault();
+        var dafId = $(this).data('id');
+
+        Swal.fire({
+            title: 'Apa anda yakin?',
+            text: 'Data yang sudah terhapus hilang permanen!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Delete',
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: 'POST',
+                    url: base_url + 'frontliner/hapus-frontliner/' + dafId,
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success) {
+                            Swal.fire({
+                                title: 'Deleted!',
+                                text: 'Data berhasil dihapus.',
+                                icon: 'success',
+                                showConfirmButton: false,
+                                timer: 1000
+                            }).then(function() {
+                                listfront();
+                            });
+                        } else {
+                            Swal.fire('Error!', response.message, 'error');
+                        }
+                    },
+                    error: function() {
+                        Swal.fire('Error!', 'An error occurred while processing the request.', 'error');
+                    }
+                });
+            }
+        });
+    });
+}
+function imgpreviewfr(fileReader) {
+    $('#upload-btn').off('click').on('click', function() {
+        $('#imgm').click();
+    });
+
+    $('#imgm').off('change').on('change', function(event) {
+        const file = event.target.files[0];
+        const $uploadBtn = $('#upload-btn');
+
+        if (file) {
+            fileReader = new FileReader();
+
+            fileReader.onload = function(e) {
+                lastImageUrl = e.target.result;
+                $uploadBtn.css('background-image', 'url(' + e.target.result + ')');
+            };
+
+            fileReader.readAsDataURL(file);
+        }
+    });
+}
+function clearImagePreview(fileReader) {
+    const $uploadBtn = $('#upload-btn');
+    $uploadBtn.css('background-image', 'none');
+    $('#imgm').val(''); 
+    if (fileReader) {
+        fileReader.abort();
+        fileReader = null; 
+    }
+}
+// 

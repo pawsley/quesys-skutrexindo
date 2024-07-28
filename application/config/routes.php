@@ -69,7 +69,14 @@ $route['mekanik/tambah-mekanik']='Dashboard/addmekanik';
 $route['mekanik/update-mekanik']='Dashboard/updatemekanik';
 $route['mekanik/hapus-mekanik/(:num)']='Dashboard/deletemekanik/$1';
 $route['mekanik/list-mekanik']='Dashboard/listmkn';
+// frontliner
+$route['frontliner/tambah-frontliner']='Dashboard/addfront';
+$route['frontliner/update-frontliner']='Dashboard/updatefront';
+$route['frontliner/hapus-frontliner/(:num)']='Dashboard/deletefront/$1';
+$route['frontliner/list-frontliner']='Dashboard/listfr';
 // antrian
 $route['now-que']='Dashboard/nowantrian';
 $route['antrian/tambah-antrian']='Dashboard/addque';
 $route['antrian/load-antrian-regist']='Dashboard/loadantrian';
+// display tv
+$route['display']='Display';

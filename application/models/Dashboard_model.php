@@ -12,19 +12,22 @@ class Dashboard_model extends CI_Model {
     }
     public function getmekanik() {
         $this->db->select('
-            id_mkn, MAX(no_antrian) AS no_antrian, 
-            MAX(id) AS id, 
-            MAX(tanggal) AS tanggal, 
-            MAX(book_time) AS book_time,
-            MAX(nama_mkn) AS nama_mkn,
-            MAX(nama_servis) AS nama_servis,
-            MAX(nama_cst) AS nama_cst
+            id_mkn, no_antrian, 
+            id, 
+            tanggal, 
+            book_time,
+            nama_mkn,
+            foto_mkn,
+            nama_fr,
+            foto_fr,
+            nama_servis,
+            nama_cst
         ');
         $this->db->from('vantrian');
         $this->db->where('tanggal', $this->tanggal);
         $this->db->where('status', '1');
-        $this->db->group_by('id_mkn');
-        $this->db->order_by('no_antrian','asc');
+        $this->db->order_by('no_antrian','desc');
+        $this->db->limit(3);
 
         $query = $this->db->get();
         return $query->result_array();
@@ -58,6 +61,10 @@ class Dashboard_model extends CI_Model {
             $this->db->insert('tbl_antrian', $data);
             return true; 
         }
+    }
+    public function detail_que($data){
+        $this->db->insert('tbl_antrian_dtl', $data);
+        return $this->db->affected_rows() > 0;
     }
     public function now_antrian() {
         $this->db->select('COUNT(id)+1 as jumlah');
@@ -113,15 +120,11 @@ class Dashboard_model extends CI_Model {
         $message = $success ? 'Data berhasil dihapus' : 'Gagal dihapus';
         return array('success' => $success, 'message' => $message);
     }
-    public function add_mekanik($nmk) {
-        $existdata = $this->db->where('nama_mkn', $nmk)
-                            ->get('tbl_mekanik')
-                            ->row();
+    public function add_mekanik($data) {
+        $this->db->where('nama_mkn', $data['nama_mkn']);
+        $existdata = $this->db->get('tbl_mekanik')->row();
+        
         if (!$existdata) {
-            $data = array(
-                'nama_mkn' => $nmk,
-                'status' => '1'
-            );
             $this->db->insert('tbl_mekanik', $data);
             return true; 
         } else {
@@ -129,7 +132,7 @@ class Dashboard_model extends CI_Model {
         }
     }
     public function getListMekanik($searchTerm=null) {
-        $this->db->select(['id_mkn', 'nama_mkn']);
+        $this->db->select(['id_mkn', 'nama_mkn','foto_mkn','status']);
         $this->db->from('tbl_mekanik');
         if ($searchTerm) {
             $this->db->group_start();
@@ -144,11 +147,69 @@ class Dashboard_model extends CI_Model {
         $this->db->where('id_mkn', $id);
         $this->db->update('tbl_mekanik', $data);
     }
-    public function delete_mekanik($id){
+    public function get_file_namedm($id) {
+        return $this->db->select('foto_mkn')
+                        ->where('id_mkn', $id)
+                        ->get('tbl_mekanik')
+                        ->row()
+                        ->foto_mkn;
+    }    
+    public function delete_mekanik($id) {
+        $file_name = $this->get_file_namedm($id);
         $success = $this->db->delete('tbl_mekanik', array("id_mkn" => $id));
+        
+        if ($success && $file_name) {
+            $file_path = realpath(APPPATH . '../assets/foto-mekanik') . '/' . $file_name;
+            if (file_exists($file_path)) {
+                unlink($file_path);
+            }
+        }
+    
         $message = $success ? 'Data berhasil dihapus' : 'Gagal dihapus';
         return array('success' => $success, 'message' => $message);
     }
+    public function add_front($data) {
+        $this->db->insert('tbl_frontliner', $data);
+        return $this->db->affected_rows() > 0; // Return true if the insert was successful
+    }        
+    public function getListFront($searchTerm=null) {
+        $this->db->select(['id_fr', 'nama_fr','foto_fr','status']);
+        $this->db->from('tbl_frontliner');
+        if ($searchTerm) {
+            $this->db->group_start();
+            $this->db->like('nama_fr', $searchTerm);
+            $this->db->group_end();
+        }
+        $this->db->order_by('nama_fr', 'asc');
+        $query = $this->db->get();
+        return $query->result_array();
+    }
+    public function update_front($id,$data){
+        $this->db->where('id_fr', $id);
+        $this->db->update('tbl_frontliner', $data);
+    }
+    public function get_file_namedf($id) {
+        return $this->db->select('foto_fr')
+                        ->where('id_fr', $id)
+                        ->get('tbl_frontliner')
+                        ->row()
+                        ->foto_fr;
+    }
+    public function delete_front($id) {
+        $file_name = $this->get_file_namedf($id);
+        $success = $this->db->delete('tbl_frontliner', array("id_fr" => $id));
+        
+        if ($success && $file_name) {
+            $file_path = realpath(APPPATH . '../assets/foto-frontliner') . '/' . $file_name;
+            if (file_exists($file_path)) {
+                unlink($file_path);
+            }
+        }
+    
+        $message = $success ? 'Data berhasil dihapus' : 'Gagal dihapus';
+        return array('success' => $success, 'message' => $message);
+    }
+        
     public function calling($id){
         $data = array(
             'status' => '1',
@@ -161,7 +222,7 @@ class Dashboard_model extends CI_Model {
         } else {
             return false;
         }
-    }
+    }   
 }
 
 /* End of file Dashboard_model.php */

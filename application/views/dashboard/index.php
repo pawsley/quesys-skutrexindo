@@ -13,6 +13,15 @@
                             </li>
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Frontliner
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                                    <li><a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#modaaddfr" data-id="afr">Add Frontliner</a></li>
+                                    <li><a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#modaaddfr" data-id="lfr">List Frontliner</a></li>
+                                </ul>
+                            </li>                            
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     Mekanik
                                 </a>
                                 <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
@@ -28,6 +37,9 @@
                                     <li><a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#modaddsrv" data-id="asrv">Add Servis</a></li>
                                     <li><a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#modaddsrv" data-id="lsrv">List Servis</a></li>
                                 </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="<?=base_url()?>display/">Display TV</a>
                             </li>
                         </ul>
                         <ul class="navbar-nav ms-auto">
@@ -78,57 +90,6 @@
                     </div>
                 </div>
             </div>
-            <div class="row" id="card-container">
-                <?php foreach ($cardmkn as $data) { ?>
-                <div class="col-md-4 mb-4 fade-in" id="card-que">
-                    <div class="card border border-success shadow-sm">
-                        <div class="card-body p-2">
-                            <div class=" mb-1">
-                                <h3 class="pt-4 text-center">ANTRIAN</h3>
-                                <hr>
-                                <h1 id="antrian-sekarang" class="display-1 fw-bold text-success text-center lh-1 pb-2"><?=$data['no_antrian']?></h1>
-                                <hr>
-                                <p class="fs-5 text-dark text-center mb-1"><?=$data['book_time']?></p>
-                                <hr>
-                                <div class="d-flex justify-content-between">
-                                    <div class="col-md-4 text-center">
-                                        <div class="feature-icon-1">
-                                            <i class="bi-person-check text-danger"></i>
-                                        </div>
-                                        <p class="fs-6 text-dark"><?=$data['nama_cst']?></p>
-                                    </div>
-                                    <div class="col-md-4 text-center">
-                                        <div class="feature-icon-1">
-                                            <i class="bi-gear text-primary"></i>
-                                        </div>
-                                        <p class="fs-6 text-dark"><?=$data['nama_servis']?></p>
-                                    </div>
-                                    <div class="col-md-4 text-center">
-                                        <div class="feature-icon-1">
-                                            <i class="bi-person-gear text-info"></i>
-                                        </div>
-                                        <p class="fs-6 text-dark"><?=$data['nama_mkn']?></p>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- <div class="feature-icon-3 me-4">
-                                <i class="bi-person-check text-danger"></i>
-                            </div> -->
-                            <!-- <div class="row g-3">
-                                <div class="col-md-12 border border-success rounded-2 py-2 mb-1">
-                                    <label>MEKANIK</label>
-                                    <hr>
-                                    <p class="fs-5 text-success mb-1"><?=$data['nama_mkn']?></p>
-                                </div>
-                                <p class="fs-5 text-success mb-1">Booking : <?=$data['book_time']?></p>
-                                <p class="fs-5 text-success mb-1">Servis : <?=$data['nama_servis']?></p>
-                                <p class="fs-5 text-success mb-1">Customer : <?=$data['nama_cst']?></p>
-                            </div> -->
-                        </div>
-                    </div>
-                </div>
-                <?php } ?>
-            </div>
         </div>
 
         <div class="card border-0 shadow-sm">
@@ -145,6 +106,7 @@
                             <th>Customer</th>
                             <th>Servis</th>
                             <th>Mekanik</th>
+                            <th>Frontliner</th>
                             <th>Panggil</th>
                             </tr>
                         </thead>
@@ -163,7 +125,7 @@
                         <form class="row g-3" id="form-srv">
                             <div class="col-md-12">
                                 <label for="namasrv" class="form-label">Nama Servis</label>
-                                <input type="text" class="form-control" id="namasrv" name="namasrv" placeholder="Masukkan nama jenis servis">
+                                <input type="text" class="form-control" id="namasrv" name="namasrv" placeholder="Masukkan nama jenis servis" required>
                             </div>
                             <div class="col-12">
                                 <button type="submit" id="subsrv" class="btn btn-success btn-block w-100">
@@ -176,7 +138,7 @@
                             
                         </div>
                     </div>
-                    <div class="modal-footer">
+                    <div class="modal-footer" id="mfsrv">
                         <form id="formu-srv">
                             <button type="submit" id="updsrv" class="btn btn-success btn-block w-100">
                                 <span id="spinner-upd" class="spinner-border spinner-border-sm text-light d-none" role="status" aria-hidden="true"></span>
@@ -195,11 +157,16 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <form class="row g-3" id="form-mkn">
+                        <form class="row g-3" id="form-mkn" enctype="multipart/form-data">
                             <div class="col-md-12">
                                 <label for="namamkn" class="form-label">Nama Mekanik</label>
-                                <input type="text" class="form-control" id="namamkn" name="namamkn" placeholder="Masukkan nama mekanik">
+                                <input type="text" class="form-control" id="namamkn" name="namamkn" placeholder="Masukkan nama mekanik" required>
                             </div>
+                            <div class="col-md-12">
+                                <label for="imgmkn" class="form-label">Foto Mekanik</label>
+                                <input class="form-control" id="imgmkn" name="imgmkn" type="file" accept=".png, .jpg, .jpeg" style="display: none;">
+                                <div id="upload-mkn" class="upload-btn"></div>
+                            </div>                            
                             <div class="col-12">
                                 <button type="submit" id="submkn" class="btn btn-success btn-block w-100">
                                     <span id="spinner-mkn" class="spinner-border spinner-border-sm text-light d-none" role="status" aria-hidden="true"></span>
@@ -211,8 +178,8 @@
                             
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <form id="formu-mkn">
+                    <div class="modal-footer" id="mfmkn">
+                        <form id="formu-mkn" enctype="multipart/form-data">
                             <button type="submit" id="updmkn" class="btn btn-success btn-block w-100">
                                 <span id="spinner-umkn" class="spinner-border spinner-border-sm text-light d-none" role="status" aria-hidden="true"></span>
                                 <span id="txupdmkn">Update</span>
@@ -221,7 +188,47 @@
                     </div>
                 </div>
             </div>
-        </div>        
+        </div>
+        <div class="modal fade" id="modaaddfr" tabindex="-1" aria-labelledby="modaaddfrLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modaaddfrLabel"></h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form class="row g-3" id="form-fr" enctype="multipart/form-data">
+                            <div class="col-md-12">
+                                <label for="namafr" class="form-label">Nama Frontliner</label>
+                                <input type="text" class="form-control" id="namafr" name="namafr" placeholder="Masukkan nama frontliner" required>
+                            </div>
+                            <div class="col-md-12">
+                                <label for="imgm" class="form-label">Foto Frontliner</label>
+                                <input class="form-control" id="imgm" name="imgm" type="file" accept=".png, .jpg, .jpeg" style="display: none;">
+                                <div id="upload-btn" class="upload-btn"></div>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" id="subfr" class="btn btn-success btn-block w-100">
+                                    <span id="spinner-fr" class="spinner-border spinner-border-sm text-light d-none" role="status" aria-hidden="true"></span>
+                                    <span id="txsubfr">Submit</span>
+                                </button>
+                            </div>
+                        </form>                    
+                        <div id="list-fr">
+                            
+                        </div>
+                    </div>
+                    <div class="modal-footer d-none" id="mffr">
+                        <form id="formu-fr" enctype="multipart/form-data">
+                            <button type="submit" id="updfr" class="btn btn-success btn-block w-100">
+                                <span id="spinner-fru" class="spinner-border spinner-border-sm text-light d-none" role="status" aria-hidden="true"></span>
+                                <span id="txupdfr">Update</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>                
         <div class="modal fade" id="modaque" tabindex="-1" aria-labelledby="modaqueLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-scrollable">
                 <div class="modal-content">
@@ -247,19 +254,21 @@
                                         <div class="col-md-6 mb-1">
                                             <label for="selmkn" class="form-label">Nama Mekanik</label>
                                             <select class="form-select required" id="selmkn" style="width: 100%" name="selmkn" required>
-                                                <!-- <option selected="" disabled="" value="0">Pilih Mekanik</option> -->
                                             </select>
                                         </div> 
                                         <div class="col-md-6 mb-1">
-                                            <label for="selsrv" class="form-label">Jenis Servis</label>
-                                            <select class="form-select" id="selsrv" style="width: 100%"  name="selsrv" required>
-                                                <!-- <option selected="" disabled="" value="0">Pilih Jenis Servis</option> -->
+                                            <label for="selfr" class="form-label">Nama Frontliner</label>
+                                            <select class="form-select" id="selfr" style="width: 100%"  name="selfr" required>
                                             </select>
-                                        </div> 
+                                        </div>
+                                        <div class="col-md-12 mb-1">
+                                            <label for="selsrv" class="form-label">Jenis Servis</label>
+                                            <select class="form-select" id="selsrv" style="width: 100%"  name="selsrv[]" required>
+                                            </select>
+                                        </div>                                         
                                         <div class="col-md-12 mb-2">
                                             <label for="selbook" class="form-label">Jam Booking</label>
                                             <select class="form-select" id="selbook" style="width: 100%"  name="selbook" required>
-                                                <!-- <option selected="" disabled="" value="0">Pilih Jam Booking</option> -->
                                             </select>
                                         </div> 
                                     </div>
@@ -269,28 +278,10 @@
                                     </button>
                                 </div>
                             </div>                            
-                            <!-- <div class="col-md-12">
-                                <label for="namamkn" class="form-label">Nama Mekanik</label>
-                                <input type="text" class="form-control" id="namamkn" name="namamkn">
-                            </div>
-                            <div class="col-12">
-                                <button type="submit" id="submkn" class="btn btn-success btn-block w-100">
-                                    <span id="spinner-mkn" class="spinner-border spinner-border-sm text-light d-none" role="status" aria-hidden="true"></span>
-                                    <span id="txsubmkn">Submit</span>
-                                </button>
-                            </div> -->
                         </form>                    
                         <div id="list-que">
                             
                         </div>
-                    </div>
-                    <div class="modal-footer">
-                        <!-- <form id="formu-mkn">
-                            <button type="submit" id="updmkn" class="btn btn-success btn-block w-100">
-                                <span id="spinner-umkn" class="spinner-border spinner-border-sm text-light d-none" role="status" aria-hidden="true"></span>
-                                <span id="txupdmkn">Update</span>
-                            </button>
-                        </form> -->
                     </div>
                 </div>
             </div>
