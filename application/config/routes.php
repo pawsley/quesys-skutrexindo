@@ -77,6 +77,7 @@ $route['frontliner/list-frontliner']='Dashboard/listfr';
 // antrian
 $route['now-que']='Dashboard/nowantrian';
 $route['antrian/tambah-antrian']='Dashboard/addque';
+$route['antrian/update-antrian']='Dashboard/updateque';
 $route['antrian/load-antrian-regist']='Dashboard/loadantrian';
 // display tv
 $route['display']='Display';

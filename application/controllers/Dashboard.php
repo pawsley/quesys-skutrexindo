@@ -59,7 +59,7 @@ class Dashboard extends Auth
     $data['content'] = $this->load->view('dashboard/index', $data, true);
     $data['js'] = '
       <script>var base_url = "' . base_url() . '";</script>
-      <script src="' . base_url('assets/js/dashboard.js?v=1.1') . '"></script>
+      <script src="' . base_url('assets/js/dashboard.js?v=1.2') . '"></script>
       <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
       <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.12.3/dist/sweetalert2.all.min.js"></script>
       <script type="text/javascript" src="https://cdn.datatables.net/v/bs5/dt-1.10.25/datatables.min.js"></script>
@@ -77,8 +77,9 @@ class Dashboard extends Auth
 
   public function loadantrian() {
     $this->load->library('datatables');
-    $this->datatables->select('id,tanggal,no_antrian,book_time,nama_mkn,nama_fr,nama_servis,nama_cst,updated_date,status');
+    $this->datatables->select('id,tanggal,no_antrian,book_time,id_mkn,nama_mkn,id_fr,nama_fr,id_adtl, id_servis,nama_servis,nama_cst,updated_date,status');
     $this->datatables->from('vantrian');
+    $this->datatables->where('tanggal',$this->tanggal);
     return print_r($this->datatables->generate());
   }
   public function listsrv(){
@@ -157,6 +158,64 @@ class Dashboard extends Auth
       show_404();
     }
   }
+  public function updateque() {
+    if ($this->input->is_ajax_request()) {
+        // Step 1: Validate and retrieve input data
+        $id = $this->input->post('eid');
+        $new_srv_ids = $this->input->post('edselsrv');
+
+        // Ensure $new_srv_ids is always an array
+        if (!is_array($new_srv_ids)) {
+            $new_srv_ids = [];
+        }
+
+        // Step 2: Fetch existing srv_id values from the database
+        $existing_srv_ids = $this->Dashboard_model->get_srv_ids_by_id($id);
+
+        // Ensure $existing_srv_ids is always an array
+        if (!is_array($existing_srv_ids)) {
+            $existing_srv_ids = [];
+        }
+
+        // Step 3: Determine the changes needed
+        $srv_ids_to_add = array_diff($new_srv_ids, $existing_srv_ids);
+        $srv_ids_to_remove = array_diff($existing_srv_ids, $new_srv_ids);
+
+        // 4b. Remove srv_id values that are no longer present
+        if (!empty($srv_ids_to_remove)) {
+          foreach ($srv_ids_to_remove as $srv_id) {
+              $this->Dashboard_model->remove_srv_id($id, $srv_id);
+          }
+        }
+
+        // Step 4: Perform Database Operations
+        // 4a. Add new srv_id values
+        if (!empty($srv_ids_to_add)) {
+            foreach ($srv_ids_to_add as $srv_id) {
+                $data = [
+                    'id' => $id,
+                    'id_servis' => $srv_id,
+                ];
+                $this->Dashboard_model->add_srv_id($data);
+            }
+        }
+
+        // 4c. Update other details if necessary
+        $update_data = [
+            'nama_cst' => $this->input->post('ednamacst'),
+            'id_mkn' => $this->input->post('edselmkn'),
+            'id_fr' => $this->input->post('edselfr'),
+            'book_time' => $this->input->post('edselbook'),
+        ];
+        $this->Dashboard_model->update_que($id, $update_data);
+
+        // Step 5: Respond to the request with success status
+        echo json_encode(['status' => 'success', 'message' => 'Data updated successfully', 'id' => $id]);
+    } else {
+        show_404();
+    }
+  }
+
   public function nowantrian() {
     if ($this->input->is_ajax_request()) {
       $jumlah_antrian = $this->Dashboard_model->now_antrian();

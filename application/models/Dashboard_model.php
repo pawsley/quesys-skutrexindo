@@ -62,6 +62,29 @@ class Dashboard_model extends CI_Model {
             return true; 
         }
     }
+    public function update_que($id,$data){
+        $this->db->where('id', $id);
+        $this->db->update('tbl_antrian', $data);
+    }
+    public function get_srv_ids_by_id($id) {
+        $query = $this->db->get_where('tbl_antrian_dtl', ['id' => $id]);
+        $result = $query->result_array();
+        return array_column($result, 'id_servis'); 
+    }
+    
+    public function add_srv_id($data) {
+        $this->db->insert('tbl_antrian_dtl', $data);
+    }
+    public function remove_srv_id($id, $srv_id) {
+        $this->db->where('id', $id);
+        $this->db->where('id_servis', $srv_id);
+        $this->db->delete('tbl_antrian_dtl');
+    }
+    public function update_details($id, $data) {
+        $this->db->where('id', $id);
+        $this->db->update('tbl_antrian_dtl', $data);
+    }
+        
     public function detail_que($data){
         $this->db->insert('tbl_antrian_dtl', $data);
         return $this->db->affected_rows() > 0;

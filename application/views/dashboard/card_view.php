@@ -15,7 +15,7 @@
                         <strong><?=$data['nama_cst']?></strong>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span>Booking</span>
+                        <span>Reservasi</span>
                         <strong><?=$data['book_time']?></strong>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center">

@@ -42,7 +42,6 @@
                 </div>
             </div>
         </footer>
-        <audio id="tingtung" src="assets/audio/tingtung.mp3"></audio>
 
         <!-- jQuery Core -->
         <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>

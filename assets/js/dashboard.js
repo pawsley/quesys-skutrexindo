@@ -59,6 +59,8 @@ function tableque() {
                                     <div class="btn-group">
                                         <button class="btn btn-success" id="callingque"
                                         data-id="${data}" data-noque="${full.no_antrian}" data-mkn="${full.nama_mkn}"><i class="bi-mic-fill"></i></button>
+                                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modaque"
+                                        id="editque" data-id="edque" data-idatr="${data}" data-noque="${full.no_antrian}" data-imkn="${full.id_mkn}" data-mkn="${full.nama_mkn}" data-ifr="${full.id_fr}" data-fr="${full.nama_fr}" data-idtl="${full.id_adtl}" data-isrv="${full.id_servis}" data-srv="${full.nama_servis}" data-jb="${full.book_time}" data-cst="${full.nama_cst}"><i class="bi-pencil-square"></i></button>
                                     </div>
                                 </ul>
                             `;
@@ -672,6 +674,9 @@ function modal_que() {
         var cid = $(btn).data('id');
 
         if (cid ==='queatr') {
+            $('#form-editque').addClass('d-none');
+            $('#form-que').removeClass('d-none');
+            $('#modaqueLabel').text('Form Antrian');
             NowQue();
             setTimeout(function () {
                 $('#namacst').val('');
@@ -679,9 +684,48 @@ function modal_que() {
             }, 500);
             $("#selmkn").val('0').trigger('change.select2');
             $("#selsrv").val('0').trigger('change.select2');
+            $("#selfr").val('0').trigger('change.select2');
             $("#selbook").val('0').trigger('change.select2');
             selectque();
             addque();
+        } else if (cid ==='edque'){
+            selectedque();
+            var idatr = $(btn).data('idatr');
+            var no = $(btn).data('noque');
+            var cst = $(btn).data('cst');
+            var imkn = $(btn).data('imkn');
+            var mkn = $(btn).data('mkn');
+            var ifr = $(btn).data('ifr');
+            var fr = $(btn).data('fr');
+            var srvData = $(btn).data('srv');
+            var isrvData = $(btn).data('isrv');
+            var srv = typeof srvData === 'string' ? srvData.split(/[\n,]+/) : [srvData];
+            var isrv = typeof isrvData === 'string' ? isrvData.split(',') : [isrvData];            
+            var jb = $(btn).data('jb');
+            var $select = $('#edselsrv');
+            $('#form-que').addClass('d-none');
+            $('#form-editque').removeClass('d-none');
+            $('#modaqueLabel').text('Edit Antrian');
+            $('#edantrian').text(no);
+            $('#ednoque').val(no);
+            $('#ednamacst').val(cst);
+            $("#edselmkn").empty().append('<option value="' + imkn + '">' + mkn + '</option>').trigger('change.select2');
+            $("#edselfr").empty().append('<option value="' + ifr + '">' + fr + '</option>').trigger('change.select2');
+            
+            $select.empty();
+    
+            for (var i = 0; i < isrv.length; i++) {
+                var optionText = srv[i] || ''; 
+                var optionValue = isrv[i];     
+                if (optionText && optionValue) { 
+                    $select.append(new Option(optionText, optionValue, true, true));
+                }
+            }
+            console.log(isrv);
+    
+            $select.trigger('change.select2');
+            $('#edselbook').val(jb);
+            updateque(idatr);
         }
     });
 }
@@ -768,83 +812,238 @@ function selectque() {
             cache: false,
         },
     });
-    $('#selmkn').on('select2:select', function(e) {
-        var data = e.params.data;
-        var id_mkn = data.id;
-        var startTime = 10; // Start time in 24-hour format
-        var endTime = 17; // End time in 24-hour format
-        var select = $('#selbook');
-        var selectedValues = select.val() || [];
+    // $('#selmkn').on('select2:select', function(e) {
+    //     var data = e.params.data;
+    //     var id_mkn = data.id;
+    //     var startTime = 10;
+    //     var endTime = 17;
+    //     var select = $('#selbook');
+    //     var selectedValues = select.val() || [];
     
-        $.ajax({
-            url: base_url + 'Dashboard/cekavail/', // URL to your CI controller method
-            type: 'POST',
-            data: {
-                id_mkn: id_mkn
-            },
-            dataType: 'json',
-            success: function(response) {
-                select.empty();
+    //     $.ajax({
+    //         url: base_url + 'Dashboard/cekavail/',
+    //         type: 'POST',
+    //         data: {
+    //             id_mkn: id_mkn
+    //         },
+    //         dataType: 'json',
+    //         success: function(response) {
+    //             select.empty();
                 
-                var options = [];
-                var bookedTimes = response.map(function(daf) { return daf.book_time; });
+    //             var options = [];
+    //             var bookedTimes = response.map(function(daf) { return daf.book_time; });
     
-                for (var hour = startTime; hour < endTime; hour++) {
-                    var start = ('0' + hour).slice(-2) + ':00';
-                    var end = ('0' + (hour + 1)).slice(-2) + ':00';
-                    var optionText = start + '-' + end;
-                    // var optionValue = hour + '-' + (hour + 1);
-                    var optionValue = start + '-' + end;
+    //             for (var hour = startTime; hour < endTime; hour++) {
+    //                 var start = ('0' + hour).slice(-2) + ':00';
+    //                 var end = ('0' + (hour + 1)).slice(-2) + ':00';
+    //                 var optionText = start + '-' + end;
+    //                 var optionValue = start + '-' + end;
     
-                    // Check if this time slot is booked
-                    if (bookedTimes.includes(optionText)) {
-                        optionText += ' (booked)';
-                    }
+    //                 if (bookedTimes.includes(optionText)) {
+    //                     optionText += ' (booked)';
+    //                 }
     
-                    var option = new Option(optionText, optionValue, false, false);
-                    options.push(option);
-                }
+    //                 var option = new Option(optionText, optionValue, false, false);
+    //                 options.push(option);
+    //             }
 
-                var placeholder = new Option('Pilih Jam Booking', '0', true, false);
-                select.append(placeholder);
-                // Append options to select element
-                select.append(options);
+    //             var placeholder = new Option('Pilih Jam Booking', '0', true, false);
+    //             select.append(placeholder);
+    //             select.append(options);
     
-                // Initialize select2 once
-                select.select2({
-                    dropdownParent: $("#modaque"),
-                    theme: 'classic',
-                    placeholder: 'Pilih Jam Booking',
-                    allowClear: true,
-                });
-                if (selectedValues.length === 0 || selectedValues.includes('0')) {
-                    select.val('0').trigger('change'); // Set placeholder as selected
-                } else {
-                    select.val(selectedValues).trigger('change');
-                }
-                select.find('option[value="0"]').prop('disabled', true);
-                // Disable options based on the response
-                select.find('option').each(function() {
-                    var optionText = $(this).text();
-                    if (optionText.endsWith('(booked)')) {
-                        $(this).prop('disabled', true);
-                    }
-                });
+    //             select.select2({
+    //                 dropdownParent: $("#modaque"),
+    //                 theme: 'classic',
+    //                 placeholder: 'Pilih Jam Booking',
+    //                 allowClear: true,
+    //             });
+    //             if (selectedValues.length === 0 || selectedValues.includes('0')) {
+    //                 select.val('0').trigger('change');
+    //             } else {
+    //                 select.val(selectedValues).trigger('change');
+    //             }
+    //             select.find('option[value="0"]').prop('disabled', true);
+    //             select.find('option').each(function() {
+    //                 var optionText = $(this).text();
+    //                 if (optionText.endsWith('(booked)')) {
+    //                     $(this).prop('disabled', true);
+    //                 }
+    //             });
     
-                // Refresh select2 to show disabled options correctly
-                select.trigger('change.select2');
-            },
-            error: function(xhr, status, error) {
-                console.error('Error checking availability:', error);
-            }
-        });
-    });
-    $('#selbook').select2({
+    //             select.trigger('change.select2');
+    //         },
+    //         error: function(xhr, status, error) {
+    //             console.error('Error checking availability:', error);
+    //         }
+    //     });
+    // });
+    // $('#selbook').select2({
+    //     dropdownParent: $("#modaque"),
+    //     theme: 'classic',
+    //     placeholder: 'Pilih Jam Booking',
+    //     allowClear: true,
+    // });
+}
+function selectedque() {
+    $('#edselmkn').select2({
         dropdownParent: $("#modaque"),
         theme: 'classic',
-        placeholder: 'Pilih Jam Booking',
+        placeholder: 'Pilih Mekanik',
         allowClear: true,
+        ajax: {
+            url: base_url + 'mekanik/list-mekanik',
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+                return {
+                    q: params.term, // Add the search term to your AJAX request
+                };
+            },
+            processResults: function (data) {
+                return {
+                    results: $.map(data, function (item) {
+                        return {
+                            id: item.id_mkn,
+                            text: item.nama_mkn,
+                        };
+                    }),
+                };
+            },
+            cache: false,
+        },
     });
+    $('#edselfr').select2({
+        dropdownParent: $("#modaque"),
+        theme: 'classic',
+        placeholder: 'Pilih Frontliner',
+        allowClear: true,
+        ajax: {
+            url: base_url + 'frontliner/list-frontliner',
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+                return {
+                    q: params.term, // Add the search term to your AJAX request
+                };
+            },
+            processResults: function (data) {
+                return {
+                    results: $.map(data, function (item) {
+                        return {
+                            id: item.id_fr,
+                            text: item.nama_fr,
+                        };
+                    }),
+                };
+            },
+            cache: false,
+        },
+    });
+    $('#edselsrv').select2({
+        dropdownParent: $("#modaque"),
+        theme: 'classic',
+        placeholder: 'Pilih Jenis Servis',
+        allowClear: true,
+        multiple: true,
+        ajax: {
+            url: base_url + 'servis/list-servis',
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+                return {
+                    q: params.term, // Add the search term to your AJAX request
+                };
+            },
+            processResults: function (data) {
+                return {
+                    results: $.map(data, function (item) {
+                        return {
+                            id: item.id_servis,
+                            text: item.nama_servis,
+                        };
+                    }),
+                };
+            },
+            cache: false,
+        },
+    });
+    // $('#edselmkn').on('select2:select', function(e) {
+    //     var data = e.params.data;
+    //     var id_mkn = data.id;
+    //     var startTime = 10; // Start time in 24-hour format
+    //     var endTime = 17; // End time in 24-hour format
+    //     var select = $('#edselbook');
+    //     var selectedValues = select.val() || [];
+    
+    //     $.ajax({
+    //         url: base_url + 'Dashboard/cekavail/', // URL to your CI controller method
+    //         type: 'POST',
+    //         data: {
+    //             id_mkn: id_mkn
+    //         },
+    //         dataType: 'json',
+    //         success: function(response) {
+    //             select.empty();
+                
+    //             var options = [];
+    //             var bookedTimes = response.map(function(daf) { return daf.book_time; });
+    
+    //             for (var hour = startTime; hour < endTime; hour++) {
+    //                 var start = ('0' + hour).slice(-2) + ':00';
+    //                 var end = ('0' + (hour + 1)).slice(-2) + ':00';
+    //                 var optionText = start + '-' + end;
+    //                 // var optionValue = hour + '-' + (hour + 1);
+    //                 var optionValue = start + '-' + end;
+    
+    //                 // Check if this time slot is booked
+    //                 if (bookedTimes.includes(optionText)) {
+    //                     optionText += ' (booked)';
+    //                 }
+    
+    //                 var option = new Option(optionText, optionValue, false, false);
+    //                 options.push(option);
+    //             }
+
+    //             var placeholder = new Option('Pilih Jam Booking', '0', true, false);
+    //             select.append(placeholder);
+    //             // Append options to select element
+    //             select.append(options);
+    
+    //             // Initialize select2 once
+    //             select.select2({
+    //                 dropdownParent: $("#modaque"),
+    //                 theme: 'classic',
+    //                 placeholder: 'Pilih Jam Booking',
+    //                 allowClear: true,
+    //             });
+    //             if (selectedValues.length === 0 || selectedValues.includes('0')) {
+    //                 select.val('0').trigger('change'); // Set placeholder as selected
+    //             } else {
+    //                 select.val(selectedValues).trigger('change');
+    //             }
+    //             select.find('option[value="0"]').prop('disabled', true);
+    //             // Disable options based on the response
+    //             select.find('option').each(function() {
+    //                 var optionText = $(this).text();
+    //                 if (optionText.endsWith('(booked)')) {
+    //                     $(this).prop('disabled', true);
+    //                 }
+    //             });
+    
+    //             // Refresh select2 to show disabled options correctly
+    //             select.trigger('change.select2');
+    //         },
+    //         error: function(xhr, status, error) {
+    //             console.error('Error checking availability:', error);
+    //         }
+    //     });
+    // });
+    // $('#edselbook').select2({
+    //     dropdownParent: $("#modaque"),
+    //     theme: 'classic',
+    //     placeholder: 'Pilih Jam Booking',
+    //     allowClear: true,
+    // });
 }
 function addque() {
     let isSubmitting = false; 
@@ -880,6 +1079,7 @@ function addque() {
                         $('#namacst').val('');
                         $('#namacst').focus();
                         $("#selmkn").val('0').trigger('change.select2');
+                        $("#selfr").val('0').trigger('change.select2');
                         $("#selsrv").val('0').trigger('change.select2');
                         $("#selbook").val('0').trigger('change.select2');
                         tableQueRgst.ajax.reload();
@@ -904,6 +1104,50 @@ function addque() {
                 $('#spinner-que').addClass('d-none');
                 $('#txque').removeClass('d-none');
                 $('#addque').prop('disabled', false);
+            }
+        });
+    });
+}
+function updateque(id) {
+    $('#form-editque').off('submit').on('submit', function(e) {
+        e.preventDefault();
+        $('#spinner-edque').removeClass('d-none');
+        $('#txedque').addClass('d-none');
+        $('#edque').prop('disabled', true);
+        var nama = $('#ednamacst').val();
+        var mkn = $('#edselmkn').val();
+        var fr = $('#edselfr').val();
+        var srv = $('#edselsrv').val();
+        var book = $('#edselbook').val();
+        $.ajax({
+            type: 'POST',
+            url: base_url + 'antrian/update-antrian', 
+            dataType: "json", 
+            data: {
+                eid: id,
+                ednamacst: nama,
+                edselmkn: mkn,
+                edselfr: fr,
+                edselbook: book,
+                edselsrv: srv
+            },
+            success: function(response) {
+                if (response.status ==='success') {
+                    Swal.fire({
+                        title: 'Success',
+                        text: "Data berhasil diupdate",
+                        icon: 'success',
+                        showConfirmButton: false,
+                        timer: 1000
+                    }).then(() => {
+                        tableQueRgst.ajax.reload();
+                    });
+                }
+            },
+            complete: function() {
+                $('#spinner-edque').addClass('d-none');
+                $('#txedque').removeClass('d-none');
+                $('#edque').prop('disabled', false);
             }
         });
     });

@@ -101,13 +101,13 @@
                     <table id="tabel-antrian" class="table table-bordered table-striped table-hover" width="100%">
                         <thead>
                             <tr>
-                            <th>Nomor Antrian</th>
-                            <th>Book Time</th>
+                            <th>Antrian</th>
+                            <th>Reservasi</th>
                             <th>Customer</th>
                             <th>Servis</th>
                             <th>Mekanik</th>
                             <th>Frontliner</th>
-                            <th>Panggil</th>
+                            <th class="text-center">Aksi</th>
                             </tr>
                         </thead>
                     </table>
@@ -267,9 +267,10 @@
                                             </select>
                                         </div>                                         
                                         <div class="col-md-12 mb-2">
-                                            <label for="selbook" class="form-label">Jam Booking</label>
-                                            <select class="form-select" id="selbook" style="width: 100%"  name="selbook" required>
-                                            </select>
+                                            <label for="selbook" class="form-label">Jam Reservasi</label>
+                                            <input class="form-select" id="selbook" type="time" name="selbook" />                                            
+                                            <!-- <select class="form-select" id="selbook" style="width: 100%"  name="selbook" required>
+                                            </select> -->
                                         </div> 
                                     </div>
                                     <button type="submit" id="addque" class="btn btn-success btn-block w-100">
@@ -278,7 +279,51 @@
                                     </button>
                                 </div>
                             </div>                            
-                        </form>                    
+                        </form>
+                        <!-- edit que -->
+                        <form class="row g-3" id="form-editque">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body d-grid p-0">
+                                    <div class="border border-success rounded-2 py-2 mb-1">
+                                        <h3 class="pt-4 text-center">ANTRIAN</h3>
+                                        <!-- menampilkan informasi jumlah antrian -->
+                                        <h1 id="edantrian" class="display-1 fw-bold text-success text-center lh-1 pb-2"></h1>
+                                        <input type="hidden" class="form-control" id="ednoque" name="ednoque">
+                                    </div>
+                                    <div class="row g-3">
+                                        <div class="col-md-12 mb-1">
+                                            <label for="ednamacst" class="form-label">Nama Customer</label>
+                                            <input type="text" class="form-control" id="ednamacst" name="ednamacst" required placeholder="Masukkan nama customer">
+                                        </div>
+                                        <div class="col-md-6 mb-1">
+                                            <label for="edselmkn" class="form-label">Nama Mekanik</label>
+                                            <select class="form-select required" id="edselmkn" style="width: 100%" name="edselmkn" required>
+                                            </select>
+                                        </div> 
+                                        <div class="col-md-6 mb-1">
+                                            <label for="edselfr" class="form-label">Nama Frontliner</label>
+                                            <select class="form-select" id="edselfr" style="width: 100%"  name="edselfr" required>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-12 mb-1">
+                                            <label for="edselsrv" class="form-label">Jenis Servis</label>
+                                            <select class="form-select" id="edselsrv" style="width: 100%"  name="edselsrv[]" required>
+                                            </select>
+                                        </div>                                         
+                                        <div class="col-md-12 mb-2">
+                                            <label for="edselbook" class="form-label">Jam Reservasi</label>
+                                            <input class="form-select" id="edselbook" type="time" name="edselbook" />
+                                            <!-- <select class="form-select" id="edselbook" style="width: 100%"  name="edselbook" required>
+                                            </select> -->
+                                        </div> 
+                                    </div>
+                                    <button type="submit" id="edque" class="btn btn-success btn-block w-100">
+                                        <span id="spinner-edque" class="spinner-border spinner-border-sm text-light d-none" role="status" aria-hidden="true"></span>
+                                        <span id="txedque">Edit Antrian</span>
+                                    </button>
+                                </div>
+                            </div>                            
+                        </form>                        
                         <div id="list-que">
                             
                         </div>
