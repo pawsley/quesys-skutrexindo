@@ -10,7 +10,7 @@ class Display_model extends CI_Model {
       $this->tanggal = gmdate("Y-m-d", time() + 60 * 60 * 7);
   }
 
-  public function getmekanik() {
+  public function waitinglist() {
     $this->db->select('
         id_mkn, no_antrian, 
         id, 
@@ -25,9 +25,8 @@ class Display_model extends CI_Model {
     ');
     $this->db->from('vantrian');
     $this->db->where('tanggal', $this->tanggal);
-    $this->db->where('status', '1');
-    $this->db->order_by('no_antrian','desc');
-    $this->db->limit(3);
+    $this->db->order_by('no_antrian','asc');
+    $this->db->limit(10);
 
     $query = $this->db->get();
     return $query->result_array();

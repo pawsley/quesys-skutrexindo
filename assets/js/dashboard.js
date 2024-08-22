@@ -1,4 +1,5 @@
 var tableQueRgst;
+var tableReport;
 $(document).ready(function() {
     $(document).on('select2:open', () => {
         document.querySelector('.select2-search__field').focus();
@@ -16,6 +17,7 @@ $(document).ready(function() {
     modal_addmkn();
     modal_addfront();
     modal_que();
+    modal_report();
     tableque();
     callque();
 });
@@ -53,14 +55,20 @@ function tableque() {
                 "data": "id",
                 "orderable": false,
                 "render": function (data, type, full, meta) {
+                    var timeParts = full.book_time.split('-');
+
+                    // Extract the start and end times
+                    var startTime = timeParts[0];
+                    var endTime = timeParts[1];
                     if (type === "display") {
                         return `
                                 <ul class="action">
                                     <div class="btn-group">
                                         <button class="btn btn-success" id="callingque"
-                                        data-id="${data}" data-noque="${full.no_antrian}" data-mkn="${full.nama_mkn}"><i class="bi-mic-fill"></i></button>
+                                        data-id="${data}" data-noque="${full.no_antrian}" data-mkn="${full.nama_mkn}"><i class="bi bi-megaphone-fill"></i></button>
                                         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modaque"
-                                        id="editque" data-id="edque" data-idatr="${data}" data-noque="${full.no_antrian}" data-imkn="${full.id_mkn}" data-mkn="${full.nama_mkn}" data-ifr="${full.id_fr}" data-fr="${full.nama_fr}" data-idtl="${full.id_adtl}" data-isrv="${full.id_servis}" data-srv="${full.nama_servis}" data-jb="${full.book_time}" data-cst="${full.nama_cst}"><i class="bi-pencil-square"></i></button>
+                                        id="editque" data-id="edque" data-idatr="${data}" data-noque="${full.no_antrian}" data-imkn="${full.id_mkn}" data-mkn="${full.nama_mkn}" data-ifr="${full.id_fr}" data-fr="${full.nama_fr}" data-idtl="${full.id_adtl}" data-isrv="${full.id_servis}" data-srv="${full.nama_servis}" data-jb="${startTime}" data-eb="${endTime}" data-cst="${full.nama_cst}">
+                                        <i class="bi-pencil-square"></i></button>
                                     </div>
                                 </ul>
                             `;
@@ -93,6 +101,61 @@ function tableque() {
             
     });
     return tableQueRgst;
+}
+function tablerp() {
+    if ($.fn.DataTable.isDataTable('#tabel-report')) {
+        tableReport.destroy();
+    }
+    tableReport = $("#tabel-report").DataTable({
+        "processing": true,
+        "language": {
+            "processing": '<div class="d-flex justify-content-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>',
+        },
+        "serverSide": true,
+        "order": [
+            [1, 'asc']
+        ],
+        "ajax": {
+            "url": base_url + 'antrian/load-antrian-report/',
+            "type": "POST"
+        },
+        "columns": [
+            { "data": "no_antrian" },
+            { "data": "reserv" },
+            { "data": "nama_cst" },
+            {
+                "data": "nama_servis",
+                "render": function(data, type, row) {
+                    return data.replace(/\n/g, '<br>');
+                }
+            },
+            { "data": "nama_mkn" },
+            { "data": "nama_fr" },    
+        ],
+        "dom":  "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                "<'row'<'col-sm-12 col-md-2 mt-2'B>>" +
+                "<'row'<'col-sm-12'tr>>" +
+                "<'row'<'col-sm-12 col-md-4'i><'col-sm-12 col-md-8'p>>",
+                "buttons": [
+                {
+                    "text": 'Refresh', // Font Awesome icon for refresh
+                    "className": 'btn btn-success', // Add a class name for identification
+                    "attr": {
+                        "id": "refresh-button" // Set the ID attribute
+                    },
+                    "init": function (api, node, config) {
+                        $(node).removeClass('btn-default');
+                        $(node).addClass('btn-success');
+                        $(node).attr('title', 'Refresh'); // Add a title attribute for tooltip
+                    },
+                    "action": function () {
+                        tableReport.ajax.reload();
+                    }
+                },
+            ]
+            
+    });
+    return tableReport;
 }
 function AntrianCount() {
     $.ajax({
@@ -702,6 +765,7 @@ function modal_que() {
             var srv = typeof srvData === 'string' ? srvData.split(/[\n,]+/) : [srvData];
             var isrv = typeof isrvData === 'string' ? isrvData.split(',') : [isrvData];            
             var jb = $(btn).data('jb');
+            var eb = $(btn).data('eb');
             var $select = $('#edselsrv');
             $('#form-que').addClass('d-none');
             $('#form-editque').removeClass('d-none');
@@ -725,8 +789,14 @@ function modal_que() {
     
             $select.trigger('change.select2');
             $('#edselbook').val(jb);
+            $('#eselend').val(eb);
             updateque(idatr);
         }
+    });
+}
+function modal_report() {
+    $('#modarepor').on('show.bs.modal', function (e) {
+        tablerp();
     });
 }
 function selectque() {
@@ -1119,6 +1189,7 @@ function updateque(id) {
         var fr = $('#edselfr').val();
         var srv = $('#edselsrv').val();
         var book = $('#edselbook').val();
+        var estd = $('#eselend').val();
         $.ajax({
             type: 'POST',
             url: base_url + 'antrian/update-antrian', 
@@ -1129,6 +1200,7 @@ function updateque(id) {
                 edselmkn: mkn,
                 edselfr: fr,
                 edselbook: book,
+                eselend: estd,
                 edselsrv: srv
             },
             success: function(response) {

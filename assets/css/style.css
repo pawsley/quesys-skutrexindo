@@ -30,8 +30,27 @@ body {
   background-color: #00aa9d !important;
 }
 
+.bg-blue {
+  background-color: #424769 !important;
+}
+
+.bg-darktheme {
+  background-color: #2D3250 !important;
+}
+
+.bg-orange {
+  background-color: #F6B17A !important;
+}
+
+
 .text-success {
   color: #00aa9d !important;
+}
+.text-orange {
+  color: #F6B17A !important;
+}
+.text-blue {
+  color: #424769 !important;
 }
 
 .btn-success {
@@ -72,6 +91,26 @@ body {
   box-shadow: 0 0 0 0.25rem rgba(60, 153, 110, 0.5);
 }
 
+.bg-display{
+  background-color: #333; /* Dark background color */
+  background-image: url('../img/bg-display.png'); /* Path to your image */
+  background-size: cover; /* Ensure the image covers the entire body */
+  background-position: center; /* Center the image */
+  background-repeat: no-repeat; /* Prevent repeating the image */
+  color: #fff; /* White text color for better visibility */
+}
+.table-blue {
+  background-color: #424769 !important;
+  color: #424769 !important;
+}
+.centered-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+}
 .btn-success:disabled,
 .btn-success.disabled {
   color: #fff;
@@ -80,9 +119,11 @@ body {
 }
 
 .border-success {
-  border-color: #00aa9d !important;
+  border-color: #F6B17A !important;
 }
-
+.border-blue {
+  border-color: #424769 !important;
+}
 .card {
   border-radius: 1rem;
 }

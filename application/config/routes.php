@@ -79,5 +79,7 @@ $route['now-que']='Dashboard/nowantrian';
 $route['antrian/tambah-antrian']='Dashboard/addque';
 $route['antrian/update-antrian']='Dashboard/updateque';
 $route['antrian/load-antrian-regist']='Dashboard/loadantrian';
+$route['antrian/load-antrian-report']='Dashboard/loadreport';
 // display tv
 $route['display']='Display';
+$route['display/refresh-data']='Display/refresh';

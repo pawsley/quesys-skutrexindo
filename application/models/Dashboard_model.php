@@ -26,11 +26,24 @@ class Dashboard_model extends CI_Model {
         $this->db->from('vantrian');
         $this->db->where('tanggal', $this->tanggal);
         $this->db->where('status', '1');
-        $this->db->order_by('no_antrian','desc');
-        $this->db->limit(3);
+        $this->db->order_by('updated_date','desc');
+        $this->db->limit(1);
 
         $query = $this->db->get();
         return $query->result_array();
+    }
+    public function cekdata() {
+        $this->db->select('
+            no_antrian, tanggal, updated_date, status
+        ');
+        $this->db->from('vantrian');
+        $this->db->where('tanggal', $this->tanggal);
+        $this->db->where('status', '1');
+        $this->db->order_by('updated_date','desc');
+        $this->db->limit(1);
+
+        $query = $this->db->get();
+        return $query->num_rows();
     }
     public function count_antrian() {
         $this->db->select('COUNT(id) as jumlah');

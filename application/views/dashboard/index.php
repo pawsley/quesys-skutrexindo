@@ -8,9 +8,18 @@
                     </button>
                     <div class="collapse navbar-collapse" id="navbarTogglerDemo03">
                         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                            <li class="nav-item">
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Antrian
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                                    <li><a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#modaque" data-id="queatr">Form Antrian</a></li>
+                                    <li><a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#modarepor" data-id="latr">Laporan Antrian</a></li>
+                                </ul>
+                            </li>                            
+                            <!-- <li class="nav-item">
                                 <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#modaque" data-id="queatr">Antrian</a>
-                            </li>
+                            </li> -->
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     Frontliner
@@ -266,12 +275,16 @@
                                             <select class="form-select" id="selsrv" style="width: 100%"  name="selsrv[]" required>
                                             </select>
                                         </div>                                         
-                                        <div class="col-md-12 mb-2">
+                                        <div class="col-md-6 mb-2">
                                             <label for="selbook" class="form-label">Jam Reservasi</label>
-                                            <input class="form-select" id="selbook" type="time" name="selbook" />                                            
+                                            <input class="form-select" id="selbook" type="time" name="selbook" />
                                             <!-- <select class="form-select" id="selbook" style="width: 100%"  name="selbook" required>
                                             </select> -->
-                                        </div> 
+                                        </div>
+                                        <div class="col-md-6 mb-2">
+                                            <label for="selend" class="form-label">Estimasi Selesai</label>
+                                            <input class="form-select" id="selend" type="time" name="selend" />
+                                        </div>
                                     </div>
                                     <button type="submit" id="addque" class="btn btn-success btn-block w-100">
                                         <span id="spinner-que" class="spinner-border spinner-border-sm text-light d-none" role="status" aria-hidden="true"></span>
@@ -310,12 +323,16 @@
                                             <select class="form-select" id="edselsrv" style="width: 100%"  name="edselsrv[]" required>
                                             </select>
                                         </div>                                         
-                                        <div class="col-md-12 mb-2">
+                                        <div class="col-md-6 mb-2">
                                             <label for="edselbook" class="form-label">Jam Reservasi</label>
                                             <input class="form-select" id="edselbook" type="time" name="edselbook" />
                                             <!-- <select class="form-select" id="edselbook" style="width: 100%"  name="edselbook" required>
                                             </select> -->
-                                        </div> 
+                                        </div>
+                                        <div class="col-md-6 mb-2">
+                                            <label for="eselend" class="form-label">Estimasi Selesai</label>
+                                            <input class="form-select" id="eselend" type="time" name="eselend" />
+                                        </div>                                        
                                     </div>
                                     <button type="submit" id="edque" class="btn btn-success btn-block w-100">
                                         <span id="spinner-edque" class="spinner-border spinner-border-sm text-light d-none" role="status" aria-hidden="true"></span>
@@ -326,6 +343,32 @@
                         </form>                        
                         <div id="list-que">
                             
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>        
+        <div class="modal fade" id="modarepor" tabindex="-1" aria-labelledby="modareporLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modaqueLabel">Laporan Antrian</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="table-responsive">
+                            <table id="tabel-report" class="table table-bordered table-striped table-hover" width="100%">
+                                <thead>
+                                    <tr>
+                                    <th>Antrian</th>
+                                    <th>Reservasi</th>
+                                    <th>Customer</th>
+                                    <th>Servis</th>
+                                    <th>Mekanik</th>
+                                    <th>Frontliner</th>
+                                    </tr>
+                                </thead>
+                            </table>
                         </div>
                     </div>
                 </div>

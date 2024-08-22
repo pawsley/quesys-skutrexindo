@@ -7,6 +7,7 @@ class Dashboard extends Auth
   public function __construct(){
     parent::__construct();
     $this->load->model('Dashboard_model');
+    $this->load->model('Display_model');
     $this->tanggal = gmdate("Y-m-d", time() + 60 * 60 * 7);
     $this->load->library('pusher_lib');
   }
@@ -59,7 +60,7 @@ class Dashboard extends Auth
     $data['content'] = $this->load->view('dashboard/index', $data, true);
     $data['js'] = '
       <script>var base_url = "' . base_url() . '";</script>
-      <script src="' . base_url('assets/js/dashboard.js?v=1.2') . '"></script>
+      <script src="' . base_url('assets/js/dashboard.js?v=1.3') . '"></script>
       <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
       <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.12.3/dist/sweetalert2.all.min.js"></script>
       <script type="text/javascript" src="https://cdn.datatables.net/v/bs5/dt-1.10.25/datatables.min.js"></script>
@@ -75,6 +76,11 @@ class Dashboard extends Auth
     $this->load->view('dashboard/card_view', ['cardmkn' => $cardmkn]);
   }
 
+  public function loadCardWait() {
+    $cardwait = $this->Display_model->waitinglist();
+    $this->load->view('dashboard/card_wait', ['cardwait' => $cardwait]);
+  }
+
   public function loadantrian() {
     $this->load->library('datatables');
     $this->datatables->select('id,tanggal,no_antrian,book_time,id_mkn,nama_mkn,id_fr,nama_fr,id_adtl, id_servis,nama_servis,nama_cst,updated_date,status');
@@ -82,6 +88,12 @@ class Dashboard extends Auth
     $this->datatables->where('tanggal',$this->tanggal);
     return print_r($this->datatables->generate());
   }
+  public function loadreport() {
+    $this->load->library('datatables');
+    $this->datatables->select('id,tanggal,no_antrian,book_time,id_mkn,nama_mkn,id_fr,nama_fr,id_adtl, id_servis,nama_servis,nama_cst,updated_date, CONCAT(tanggal, " (", book_time, ")") as reserv,status');
+    $this->datatables->from('vantrian');
+    return print_r($this->datatables->generate());
+  }  
   public function listsrv(){
     $searchTerm = $this->input->get('q');
     $results = $this->Dashboard_model->getListServis($searchTerm);
@@ -126,13 +138,14 @@ class Dashboard extends Auth
       $selfr = $this->input->post('selfr');
       $selsrv = $this->input->post('selsrv');
       $selbook = $this->input->post('selbook');
+      $selend = $this->input->post('selend');
       $data = array(
         'tanggal' => $this->tanggal,
         'no_antrian' => $noque,
         'nama_cst' => $namacst,
         'id_mkn' => $selmkn,
         'id_fr' => $selfr,
-        'book_time' => $selbook,
+        'book_time' => $selbook.'-'.$selend,
         'status' => '0'
       );
 
@@ -147,6 +160,8 @@ class Dashboard extends Auth
           );
           $this->Dashboard_model->detail_que($data_dtl);
         }
+        $data = array('load' => 'newdata');
+        $this->pusher_lib->trigger('waiting-channel', 'waiting-event', $data);
       }
 
       if ($inserted) {
@@ -205,9 +220,11 @@ class Dashboard extends Auth
             'nama_cst' => $this->input->post('ednamacst'),
             'id_mkn' => $this->input->post('edselmkn'),
             'id_fr' => $this->input->post('edselfr'),
-            'book_time' => $this->input->post('edselbook'),
+            'book_time' => $this->input->post('edselbook').'-'.$this->input->post('eselend'),
         ];
         $this->Dashboard_model->update_que($id, $update_data);
+        $data = array('load' => 'newdata');
+        $this->pusher_lib->trigger('waiting-channel', 'waiting-event', $data);
 
         // Step 5: Respond to the request with success status
         echo json_encode(['status' => 'success', 'message' => 'Data updated successfully', 'id' => $id]);
