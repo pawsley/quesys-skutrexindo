@@ -1,4 +1,4 @@
-    <div class="pt-2" style="margin-left:24px !important; margin-right:24px !important">
+    <div class="pt-2" style="margin-left:68px !important; margin-right:68px !important">
         <div class="d-flex flex-column flex-md-row align-items-center justify-content-between px-4 py-3 mb-3 bg-blue rounded-2 shadow-lg sticky-top">
             <div class="row align-items-start">
                 <div class="col-md-3">
@@ -12,7 +12,7 @@
             </div>
             <div id="dateTime" class="text-white fs-6"></div>
         </div>
-        <div class="row px-2 py-2 bg-blue rounded-2 shadow-lg" style="margin-left:0px !important; margin-right:0px !important">
+        <div class="row px-2 py-2 bg-blue rounded-3 shadow-lg" style="margin-left:0px !important; margin-right:0px !important">
             <!-- <div class="row px-4 py-3 mb-3 bg-blue rounded-2 shadow-lg sticky-top"> -->
                 <div class="col-md-12">
                     <h4> WAITING LIST </h4>
